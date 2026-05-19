@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEOK HUH — Wireframe</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #fff;
+      color: #111;
+    }
+
+    /* ─── WIREFRAME LABEL ─── */
+    .wf-label {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 9999;
+      background: #222;
+      color: #fff;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 2px;
+      padding: 6px;
+    }
+
+    /* ─── NAVIGATION ─── */
+    nav {
+      position: fixed;
+      top: 26px; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      border-bottom: 1.5px solid #ddd;
+      background: #fff;
+    }
+
+    nav .logo {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      padding: 6px 14px;
+      color: #444;
+    }
+
+    nav ul {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    nav ul li a {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-decoration: none;
+      color: #444;
+      font-weight: 600;
+      padding-bottom: 2px;
+    }
+
+    nav ul li a:hover { color: #111; }
+
+    /* ─── SECTIONS COMMON ─── */
+    section {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 100px 48px 80px;
+      border-bottom: 2px solid #eee;
+      position: relative;
+    }
+
+    .section-tag { display: none; }
+
+    .wf-box {
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    /* ─── HERO ─── */
+    #hero {
+      min-height: 80vh;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding-top: 120px;
+      padding-bottom: 120px;
+    }
+
+    .hero-content {
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-name {
+      font-size: clamp(48px, 8vw, 96px);
+      font-weight: 800;
+      letter-spacing: 4px;
+      line-height: 1;
+      margin-bottom: 16px;
+      color: #111;
+    }
+
+    .hero-title {
+      font-size: 14px;
+      letter-spacing: 4px;
+      color: #666;
+      display: block;
+      padding: 6px 12px;
+    }
+
+    .hero-cta {
+      display: inline-block;
+      margin-top: 40px;
+      padding: 10px 28px;
+      border: 1px solid #bbb;
+      font-size: 11px;
+      letter-spacing: 3px;
+      font-weight: 400;
+      cursor: pointer;
+      background: #fff;
+      color: #999;
+      white-space: nowrap;
+    }
+
+    /* ─── GALLERY SECTIONS ─── */
+    .gallery-section {
+      min-height: auto;
+      padding-top: 120px;
+      padding-bottom: 80px;
+    }
+
+    .gallery-heading {
+      font-size: 11px;
+      letter-spacing: 4px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #111;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .gallery-item {
+      aspect-ratio: 4/3;
+      position: relative;
+    }
+
+    .gallery-item .wf-box {
+      width: 100%;
+      height: 100%;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .gallery-item .item-label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: #bbb;
+    }
+
+    .gallery-item .item-tag {
+      font-size: 9px;
+      background: #e8e8e8;
+      padding: 2px 8px;
+      letter-spacing: 1px;
+      color: #888;
+    }
+
+    /* ─── ABOUT ─── */
+    #about {
+      min-height: auto;
+      padding-top: 120px;
+      padding-bottom: 120px;
+    }
+
+    .about-content { max-width: 1100px; margin: 0 auto; }
+
+    .about-content h2 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+    }
+
+    .about-korean {
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: #111;
+      margin-left: 12px;
+    }
+
+    .about-bio {
+      width: 100%;
+      height: 80px;
+      margin-bottom: 40px;
+    }
+
+    /* 툴 뱃지: 모든 그룹을 한 줄로 */
+    .tools-section {
+      display: flex;
+      gap: 48px;
+      flex-wrap: wrap;
+      margin-bottom: 0;
+    }
+
+    .tools-section h3,
+    .info-section h3 {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #aaa;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .tools-group { margin-bottom: 0; }
+
+    .tools-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      padding: 6px 14px;
+      border: 1px solid #e0e0e0;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #666;
+      background: #f9f9f9;
+    }
+
+    /* ─── EXPERIENCE / EDUCATION / AWARDS — 3컬럼 ─── */
+    .info-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px;
+      margin-top: 48px;
+      border-top: 1px solid #eee;
+      padding-top: 32px;
+    }
+
+    .info-section h3 { margin-bottom: 16px; }
+
+    .info-entry {
+      width: 100%;
+      height: 56px;
+      margin-bottom: 12px;
+    }
+
+    /* ─── CONTACT ─── */
+    #contact {
+      min-height: auto;
+      padding-top: 120px;
+      padding-bottom: 120px;
+      align-items: center;
+      text-align: center;
+    }
+
+    .contact-title {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+    }
+
+    .contact-sub {
+      font-size: 12px;
+      color: #aaa;
+      letter-spacing: 2px;
+      margin-bottom: 40px;
+      display: inline-block;
+      padding: 6px 16px;
+    }
+
+    .contact-email {
+      display: block;
+      width: 320px;
+      padding: 16px 0;
+      text-align: center;
+      border: 2px solid #111;
+      font-size: 12px;
+      letter-spacing: 3px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .contact-icons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .icon-box {
+      width: 44px;
+      height: 44px;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      padding: 24px 48px;
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer span {
+      font-size: 11px;
+      color: #bbb;
+      letter-spacing: 2px;
+    }
+
+    /* ─── ANNOTATIONS ─── */
+    .annotation { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- WIREFRAME NOTICE -->
+  <div class="wf-label">WIREFRAME — SEOK HUH PORTFOLIO</div>
+
+  <!-- ─── NAVIGATION ─── -->
+  <nav>
+    <div class="logo">SEOK HUH</div>
+    <ul>
+      <li><a href="#gallery-clothing">WORK</a></li>
+      <li><a href="#about">ABOUT</a></li>
+      <li><a href="#contact">CONTACT</a></li>
+    </ul>
+  </nav>
+
+  <!-- ─── HERO ─── -->
+  <section id="hero">
+    <span class="section-tag">01 — HERO</span>
+    <div class="annotation" style="top: 80px;">
+      화면 중앙 배치.<br>
+      이름 + 직함 + CTA 버튼.
+    </div>
+    <div class="hero-content">
+      <div class="hero-name">SEOK HUH</div>
+      <div class="hero-title">3D TECHNICAL DESIGNER</div>
+      <div class="hero-cta">VIEW MY WORK ↓</div>
+    </div>
+  </section>
+
+  <!-- ─── GALLERY: CLOTHING ─── -->
+  <section id="gallery-clothing" class="gallery-section">
+    <span class="section-tag">02 — CLOTHING</span>
+    <div class="annotation" style="top: 80px;">
+      이미지 클릭 → 라이트박스 확대.
+    </div>
+    <div class="gallery-heading">CLOTHING</div>
+    <div class="gallery-grid">
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">CLOTHING</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">CLOTHING</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">CLOTHING</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">CLOTHING</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">CLOTHING</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">CLOTHING</span></div></div>
+    </div>
+  </section>
+
+  <!-- ─── GALLERY: 3D ART ─── -->
+  <section id="gallery-3dart" class="gallery-section">
+    <span class="section-tag">03 — 3D ART</span>
+    <div class="gallery-heading">3D ART</div>
+    <div class="gallery-grid">
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">3D ART</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">3D ART</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">3D ART</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">3D ART</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">3D ART</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">3D ART</span></div></div>
+    </div>
+  </section>
+
+  <!-- ─── GALLERY: AI ─── -->
+  <section id="gallery-ai" class="gallery-section">
+    <span class="section-tag">04 — AI</span>
+    <div class="gallery-heading">AI</div>
+    <div class="gallery-grid">
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">AI</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">AI</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">AI</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">AI</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">AI</span></div></div>
+      <div class="gallery-item"><div class="wf-box"><span class="item-label">IMAGE / VIDEO</span><span class="item-tag">AI</span></div></div>
+    </div>
+  </section>
+
+  <!-- ─── ABOUT ─── -->
+  <section id="about">
+    <span class="section-tag">05 — ABOUT</span>
+    <div class="annotation" style="top: 80px;">
+      소개 + 툴 뱃지 +<br>경력 / 학력 / 수상.
+    </div>
+
+    <div class="about-content">
+      <h2>SEOK HUH <span class="about-korean">허 석</span></h2>
+      <div class="wf-box about-bio">자기소개 텍스트 (2–3줄)</div>
+
+      <!-- Tool Badges -->
+      <div class="tools-section">
+        <div class="tools-group">
+          <h3>3D</h3>
+          <div class="tools-badges">
+            <span class="badge">Blender</span>
+            <span class="badge">CLO3D</span>
+            <span class="badge">Marvelous Designer</span>
+            <span class="badge">DAZ3D</span>
+          </div>
+        </div>
+        <div class="tools-group">
+          <h3>IMAGE</h3>
+          <div class="tools-badges">
+            <span class="badge">Photoshop</span>
+            <span class="badge">Illustrator</span>
+            <span class="badge">Substance Painter</span>
+          </div>
+        </div>
+        <div class="tools-group">
+          <h3>VIDEO</h3>
+          <div class="tools-badges">
+            <span class="badge">Premiere Pro</span>
+            <span class="badge">After Effects</span>
+          </div>
+        </div>
+        <div class="tools-group">
+          <h3>AI</h3>
+          <div class="tools-badges">
+            <span class="badge">Claude Code</span>
+            <span class="badge">Antigravity</span>
+            <span class="badge">ChatGPT</span>
+            <span class="badge">Gemini</span>
+            <span class="badge">Flux</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experience / Education / Awards — 3컬럼 -->
+      <div class="info-row">
+        <div class="info-section">
+          <h3>EXPERIENCE</h3>
+          <div class="wf-box info-entry">회사명 / 직책 / 재직기간</div>
+          <div class="wf-box info-entry">회사명 / 직책 / 재직기간</div>
+          <div class="wf-box info-entry">회사명 / 직책 / 재직기간</div>
+        </div>
+        <div class="info-section">
+          <h3>EDUCATION</h3>
+          <div class="wf-box info-entry">학교명 / 전공 / 졸업연도</div>
+          <div class="wf-box info-entry">학교명 / 전공 / 졸업연도</div>
+        </div>
+        <div class="info-section">
+          <h3>AWARDS</h3>
+          <div class="wf-box info-entry">수상명 / 주최기관 / 연도</div>
+          <div class="wf-box info-entry">수상명 / 주최기관 / 연도</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CONTACT ─── -->
+  <section id="contact">
+    <span class="section-tag">06 — CONTACT</span>
+    <div class="annotation" style="top: 80px;">
+      이메일 버튼 클릭 시<br>메일 앱 자동 실행.
+    </div>
+
+    <div class="contact-title">CONTACT</div>
+    <div class="contact-email">이메일 주소</div>
+    <div class="contact-email">전화번호</div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer>
+    <span>© 2025 SEOK HUH</span>
+    <span>3D TECHNICAL DESIGNER</span>
+  </footer>
+
+</body>
+</html>
