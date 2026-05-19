@@ -1,0 +1,37 @@
+:root {
+  --color-bg: #FFFFFF;
+  --color-bg-alt: #F7F7F7;
+  --color-text: #111111;
+  --color-text-muted: #666666;
+  --color-text-faint: #999999;
+  --color-border: #E5E5E5;
+  --font-main: 'Outfit', sans-serif;
+  --nav-height: 72px;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+img, video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
