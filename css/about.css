@@ -1,5 +1,4 @@
 #about {
-  border-top: 1px solid var(--color-border);
 }
 
 .about-content {
@@ -7,11 +6,18 @@
   margin: 0 auto;
 }
 
+.about-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  margin-bottom: 56px;
+}
+
 .about-name {
   font-size: 36px;
   font-weight: 800;
   letter-spacing: 3px;
-  margin-bottom: 32px;
 }
 
 .about-name .korean {
@@ -24,22 +30,30 @@
   font-size: 15px;
   line-height: 1.8;
   color: var(--color-text-muted);
-  max-width: 680px;
-  margin-bottom: 56px;
 }
 
 /* ─── TOOL BADGES ─── */
+.tools-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--color-text-faint);
+  margin-bottom: 24px;
+  padding-top: 48px;
+  border-top: 1px solid var(--color-border);
+}
+
 .tools-section {
   display: flex;
   gap: 56px;
   flex-wrap: wrap;
-  margin-bottom: 64px;
-  padding-bottom: 56px;
+  margin-bottom: 0;
+  padding-bottom: 40px;
   border-bottom: 1px solid var(--color-border);
 }
 
 .tools-group h3 {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 3px;
   color: var(--color-text-faint);
@@ -66,10 +80,11 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 48px;
+  padding-top: 32px;
 }
 
 .info-section h3 {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 3px;
   color: var(--color-text-faint);
@@ -88,11 +103,25 @@
   border-bottom: none;
 }
 
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
 .info-entry .entry-title {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 1px;
-  margin-bottom: 4px;
+}
+
+.entry-role {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  margin-left: 8px;
 }
 
 .info-entry .entry-sub {
@@ -102,7 +131,32 @@
 }
 
 .info-entry .entry-date {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-text-faint);
   margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .about-header {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+  .about-name {
+    font-size: 28px;
+  }
+  .about-name .korean {
+    display: block;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+  .tools-section {
+    gap: 24px;
+    padding-bottom: 40px;
+  }
+  .info-row {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding-top: 32px;
+  }
 }

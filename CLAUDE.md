@@ -22,6 +22,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 새로운 모듈을 추가하거나 변경할 경우 `docs/modules.md`를 함께 업데이트한다.
 - 모듈의 역할과 구조는 항상 문서로 설명되어야 한다.
 
+## 5. 규칙 문서 동기화
+- 규칙이나 컨벤션이 새로 생기거나, 수정되거나, 삭제될 때는 **반드시** 관련 문서를 즉시 업데이트한다.
+- 파일 명명 규칙 → `docs/conventions.md`
+- 모듈/구조 변경 → `docs/modules.md`
+- 프로젝트 툴 정보 → `docs/projects.md`
+- 협업 규칙 → 이 파일 (CLAUDE.md)
+
 ## 4. 의문점은 반드시 질문
 - 요구사항이 불명확하거나 판단이 필요한 경우, 임의로 결정하지 않고 사용자에게 질문한다.
 - 작은 결정이라도 사용자의 의도와 다를 수 있으므로 확인 후 진행한다.
@@ -75,20 +82,26 @@ portfolio/
 
 | 섹션 | ID | 주요 특징 |
 |------|----|-----------|
-| Hero | `#hero` | 80vh, 중앙 배치, VIEW MY WORK 버튼 |
-| Gallery | `#gallery-clothing` / `#gallery-3dart` / `#gallery-ai` | 탭 없음, 각 카테고리 독립 섹션, 3열 그리드, 라이트박스 |
-| About | `#about` | 사진 없음, bio + 툴뱃지(가로) + EXPERIENCE/EDUCATION/AWARDS(3컬럼), max-width 1100px |
-| Contact | `#contact` | 이메일 + 전화번호 (고정 너비 320px), SNS 아이콘 없음 |
+| Hero | `#hero` | 전체화면, 중앙 배치, VIEW MY WORK 버튼 |
+| Sampling | `#gallery-sampling` | 캐러셀 + 점 네비게이션, 라이트박스 |
+| 3D Work | `#gallery-3dwork` | 캐러셀 + 점 네비게이션, 라이트박스 |
+| AI | `#gallery-ai` | 캐러셀 (현재 비어있음) |
+| About | `#about` | bio + 툴뱃지(가로) + EXPERIENCE/EDUCATION/AWARDS(3컬럼) |
+| Contact | `#contact` | 이메일 + 전화번호 |
 
 ## 갤러리 작품 추가
 
-`assets/images/` 또는 `assets/videos/`에 파일 추가 후 `index.html` 갤러리 섹션에 아래 형식으로 추가:
+`assets/sampling/` 또는 `assets/3d work/`에 프로젝트 폴더 추가 후 `index.html` 갤러리 섹션에 아래 형식으로 추가:
 
 ```html
-<div class="gallery-item" data-category="clothing">
-  <img src="assets/images/파일명.jpg" alt="작품 설명">
-  <div class="overlay"><span>작품 제목</span></div>
+<div class="gallery-item"
+     data-title="프로젝트 제목"
+     data-tools="Tool A, Tool B"
+     data-images='["assets/sampling/프로젝트/thumbnail.png"]'>
+  <img src="assets/sampling/프로젝트/thumbnail.png" alt="프로젝트 제목">
+  <div class="overlay"><span>프로젝트 제목</span></div>
 </div>
 ```
 
-카테고리 값: `clothing` / `3dart` / `ai`
+파일 명명 규칙 및 레이아웃 제어: `docs/conventions.md` 참고
+프로젝트 툴 정보: `docs/projects.md` 참고

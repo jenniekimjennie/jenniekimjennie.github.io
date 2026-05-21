@@ -2,36 +2,77 @@
 .gallery-section {
   padding-top: 100px;
   padding-bottom: 80px;
-  border-top: 1px solid var(--color-border);
 }
 
 .gallery-heading {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 4px;
   color: var(--color-text);
   margin-bottom: 32px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--color-text);
-  display: inline-block;
+  display: block;
+}
+
+.gallery-carousel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.carousel-viewport {
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  cursor: grab;
+}
+
+.carousel-viewport:active {
+  cursor: grabbing;
 }
 
 .gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 12px;
+  transition: transform 0.5s ease;
+  will-change: transform;
 }
 
 .gallery-item {
-  aspect-ratio: 4/3;
+  flex: 0 0 auto;
+  aspect-ratio: 3/4;
   overflow: hidden;
   position: relative;
   cursor: pointer;
   background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+}
+
+.carousel-prev,
+.carousel-next {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--color-text);
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  padding: 8px 8px;
+  font-family: var(--font-main);
+}
+
+.carousel-prev:hover,
+.carousel-next:hover {
+  opacity: 1;
 }
 
 .gallery-item img,
 .gallery-item video {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -58,7 +99,7 @@
 }
 
 .gallery-item .overlay span {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 2px;
   color: #fff;
@@ -72,6 +113,34 @@
   transform: translateY(0);
 }
 
+/* ─── CAROUSEL DOTS ─── */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-text);
+  opacity: 0.2;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.carousel-dot.active {
+  opacity: 0.7;
+}
+
+.carousel-dot:hover {
+  opacity: 0.5;
+}
+
 /* ─── LIGHTBOX ─── */
 .lightbox {
   display: none;
@@ -79,31 +148,16 @@
   inset: 0;
   z-index: 1000;
   background: rgba(0, 0, 0, 0.92);
-  align-items: center;
-  justify-content: center;
 }
 
 .lightbox.active {
-  display: flex;
-}
-
-.lightbox-inner {
-  position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
-}
-
-.lightbox-inner img,
-.lightbox-inner video {
-  max-width: 90vw;
-  max-height: 90vh;
-  object-fit: contain;
+  display: block;
 }
 
 .lightbox-close {
-  position: absolute;
-  top: -40px;
-  right: 0;
+  position: fixed;
+  top: 24px;
+  right: 32px;
   font-size: 24px;
   color: #fff;
   cursor: pointer;
@@ -112,8 +166,224 @@
   line-height: 1;
   opacity: 0.7;
   transition: opacity 0.2s;
+  z-index: 1001;
 }
 
 .lightbox-close:hover {
   opacity: 1;
+}
+
+.lightbox-title {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #fff;
+  opacity: 0.7;
+  z-index: 1001;
+}
+
+.lightbox-scroll {
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 72px 24px 48px;
+}
+
+.lightbox-scroll img,
+.lightbox-scroll video {
+  max-width: 80vw;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+.lightbox-scroll img {
+  cursor: zoom-in;
+}
+
+.lightbox-tools {
+  width: 100%;
+  max-width: 80vw;
+  padding: 32px 0 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: 8px;
+}
+
+.lightbox-tools-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 12px;
+}
+
+.lightbox-tools-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lightbox-tools-list span {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 5px 12px;
+}
+
+/* ─── LIGHTBOX GRID LAYOUT ─── */
+.lightbox-scroll.layout-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 72px 10vw 48px;
+}
+
+.grid-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+}
+
+.grid-row img,
+.grid-row video {
+  min-width: 0;
+  flex-shrink: 0;
+  height: auto;
+}
+
+.media-caption {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 8px 0 0;
+  text-align: center;
+}
+
+.hover-pair {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.hover-pair img.hover-fullshot {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hover-pair img.hover-closeup {
+  display: none;
+}
+
+/* ─── LIGHTBOX HOVER (통일) ─── */
+.media-item {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.media-item img,
+.media-item video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.media-item::after,
+.hover-pair::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.media-item,
+.hover-pair {
+  transition: transform 0.3s ease;
+}
+
+.media-item:hover,
+.hover-pair:hover {
+  transform: scale(1.03);
+}
+
+.media-item:hover::after,
+.hover-pair:hover::after {
+  opacity: 1;
+}
+
+.hover-pair {
+  cursor: pointer;
+}
+
+/* ─── SOUND HINT ─── */
+.sound-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0);
+  transition: color 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.media-item:hover .sound-hint {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ─── ZOOM OVERLAY ─── */
+.lightbox-zoom {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1002;
+  background: rgba(0, 0, 0, 0.97);
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+
+.lightbox-zoom.active {
+  display: flex;
+}
+
+.lightbox-zoom-content {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-zoom-content img,
+.lightbox-zoom-content video {
+  max-width: 95vw;
+  max-height: 95vh;
+  object-fit: contain;
+}
+
+.lightbox-zoom-content.zoom-pair img,
+.lightbox-zoom-content.zoom-pair video {
+  max-width: calc(50vw - 8px);
+  max-height: 90vh;
 }

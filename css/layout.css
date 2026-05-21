@@ -8,11 +8,14 @@ nav {
   align-items: center;
   justify-content: space-between;
   padding: 0 48px;
-  background: var(--color-bg);
-  transition: border-bottom 0.3s ease;
+  background: transparent;
+  transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
 }
 
 nav.scrolled {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -29,7 +32,7 @@ nav.scrolled {
 }
 
 .nav-links a {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 2px;
   color: var(--color-text-muted);
@@ -43,6 +46,7 @@ nav.scrolled {
 /* ─── SECTIONS COMMON ─── */
 section {
   padding: 120px 48px 100px;
+  border-top: none;
 }
 
 .fade-in {
@@ -54,4 +58,23 @@ section {
 .fade-in.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  nav {
+    padding: 0 20px;
+    height: 60px;
+  }
+  .nav-links {
+    gap: 20px;
+  }
+  .nav-logo {
+    font-size: 12px;
+  }
+  .nav-links a {
+    font-size: 12px;
+  }
+  section {
+    padding: 80px 20px 60px;
+  }
 }

@@ -8,25 +8,40 @@
 
 ```
 portfolio/
-├── CLAUDE.md               # 작업 규칙 문서
+├── CLAUDE.md               # Claude 협업 규칙
 ├── index.html              # 메인 HTML — 모든 섹션의 뼈대
 ├── docs/
-│   └── modules.md          # 이 문서 — 모듈 구조 설명
+│   ├── modules.md          # 이 문서 — 모듈 구조 설명
+│   ├── conventions.md      # 파일 명명 규칙 및 에셋 관리
+│   └── projects.md         # 프로젝트별 툴 정보 (source of truth)
 ├── css/
 │   ├── base.css            # 전역 변수, 리셋, 공통 스타일
 │   ├── layout.css          # 네비게이션, 섹션 공통 레이아웃
 │   ├── hero.css            # Hero 섹션 스타일
 │   ├── about.css           # About 섹션 스타일
-│   ├── gallery.css         # Gallery 섹션 스타일 (탭 필터, 그리드, 라이트박스)
+│   ├── gallery.css         # 캐러셀, 라이트박스 스타일
 │   └── contact.css         # Contact 섹션 스타일
 ├── js/
 │   ├── nav.js              # 네비게이션 동작
-│   ├── gallery.js          # 갤러리 필터링 + 라이트박스
-│   └── animations.js       # 스크롤 애니메이션
+│   ├── gallery.js          # 캐러셀 + 라이트박스 + 줌
+│   └── animations.js       # 스크롤 페이드인 애니메이션
 └── assets/
-    ├── images/             # 작품 이미지 파일 (사용자가 직접 추가)
-    └── videos/             # 작품 영상 파일 (사용자가 직접 추가)
+    ├── clothing/           # SAMPLING 섹션 에셋
+    └── 3d work/            # 3D WORK 섹션 에셋
 ```
+
+---
+
+## 페이지 섹션 구조
+
+| 섹션 | ID | 주요 특징 |
+|------|----|-----------|
+| Hero | `#hero` | 전체화면, 중앙 배치, VIEW MY WORK 버튼 |
+| Sampling | `#gallery-sampling` | 캐러셀, 점 네비게이션, 라이트박스 |
+| 3D Work | `#gallery-3dwork` | 캐러셀, 점 네비게이션, 라이트박스 |
+| AI | `#gallery-ai` | 캐러셀 (현재 비어있음) |
+| About | `#about` | bio + 툴뱃지 + EXPERIENCE/EDUCATION/AWARDS |
+| Contact | `#contact` | 이메일 + 전화번호 |
 
 ---
 
@@ -35,82 +50,80 @@ portfolio/
 ### `base.css`
 - CSS 커스텀 프로퍼티(변수) 정의: 색상, 폰트, 간격
 - 브라우저 기본 스타일 리셋
-- body, 공통 타이포그래피 설정
-- **여기서 색상/폰트를 바꾸면 전체 사이트에 반영됨**
+- **색상/폰트 변경은 여기서**
 
 ### `layout.css`
 - 상단 고정 네비게이션 바 레이아웃
 - 섹션 공통 padding/margin
-- 반응형 그리드 컨테이너
 
 ### `hero.css`
 - Hero 섹션 전체화면 레이아웃
-- 이름(SEOK HUH), 직함 타이포그래피
-- CTA 버튼 스타일
-- fade-in 진입 애니메이션
+- 이름, 직함 타이포그래피, CTA 버튼
 
 ### `about.css`
-- 툴 뱃지(Blender, CLO3D 등) 스타일
-- 소개 텍스트 레이아웃
+- 툴 뱃지 스타일
+- EXPERIENCE / EDUCATION / AWARDS 3컬럼 레이아웃
 
 ### `gallery.css`
-- CLOTHING / 3D ART / AI 탭 필터 버튼 스타일
-- 이미지 그리드 레이아웃 (3열)
-- 이미지 hover overlay 효과
-- 라이트박스 팝업 스타일
+- 캐러셀 (화살표 버튼 + 유한 슬라이드, 시작/끝에서 화살표 비활성)
+- 점 네비게이션 (항목 수만큼 dot, 현재 보이는 항목 활성 표시)
+- 썸네일 카드 hover 효과
+- 라이트박스 (풀스크린 오버레이 + 세로 스크롤)
+- 그리드 레이아웃 (`_c숫자` suffix 기반 행/열 배치)
+- hover-pair (fullshot/closeup 클릭 시 나란히 줌)
+- 줌 오버레이 (라이트박스 내 이미지/영상 클릭 시 전체화면)
 
 ### `contact.css`
-- 이메일 버튼, SNS 아이콘 스타일
-- Contact 섹션 레이아웃
+- 이메일, 전화번호 버튼 스타일
 
 ---
 
 ## JS 모듈
 
 ### `nav.js`
-- **역할**: 네비게이션 바 동작 제어
-- 스크롤 시 배경 전환 (투명 → 흰색 + 그림자)
-- 메뉴 클릭 시 해당 섹션으로 부드럽게 스크롤
+- 스크롤 시 nav 배경 전환 (투명 → 배경색)
 
 ### `gallery.js`
-- **역할**: 갤러리 필터링 및 라이트박스
-- 탭 클릭 시 해당 카테고리 작품만 표시 (data-category 속성 기반)
-- 이미지 클릭 시 라이트박스 열기/닫기
-- 영상 클릭 시 라이트박스 내 재생
+- **캐러셀**: 화살표/점 클릭으로 슬라이드. 유한(시작/끝 비활성). 3개씩 표시
+- **빈 항목 제거**: `data-images`가 빈 배열이면 자동 제거, 섹션 전체 숨김
+- **라이트박스**: 카드 클릭 → 이미지/영상 풀스크린 오버레이
+- **그리드 레이아웃**: `_c숫자` 파일명 감지 시 행 그룹 + 열 너비 자동 적용
+- **hover-pair**: `_fullshot_`/`_closeup_` 파일명 감지 시 자동 페어링
+- **레이블**: `data-captions` 속성으로 이미지 하단 텍스트 표시
+- **줌**: 라이트박스 내 이미지/영상 클릭 → 전체화면 확대 (영상은 사운드 재생)
+- **TOOL 표시**: 라이트박스 하단에 사용 툴 뱃지 출력
 
 ### `animations.js`
-- **역할**: 스크롤 기반 페이드인 애니메이션
-- IntersectionObserver로 화면에 들어오는 요소에 `visible` 클래스 추가
-- CSS transition과 연동
+- IntersectionObserver 기반 스크롤 페이드인
 
 ---
 
-## 갤러리 작품 추가 방법
-
-1. `assets/images/` 또는 `assets/videos/` 폴더에 파일 추가
-2. `index.html`의 갤러리 섹션에 아래 형식으로 항목 추가:
+## 갤러리 카드 HTML 구조
 
 ```html
-<!-- 이미지 작품 -->
-<div class="gallery-item" data-category="clothing">
-  <img src="assets/images/파일명.jpg" alt="작품 설명">
-  <div class="overlay"><span>작품 제목</span></div>
-</div>
-
-<!-- 영상 작품 -->
-<div class="gallery-item" data-category="3dart">
-  <video src="assets/videos/파일명.mp4" poster="assets/images/썸네일.jpg"></video>
-  <div class="overlay"><span>작품 제목</span></div>
+<div class="gallery-item"
+     data-title="프로젝트 제목"
+     data-tools="Tool A, Tool B"
+     data-images='["assets/sampling/프로젝트/00_front.png", ...]'
+     data-captions='{"파일명.png":"LABEL"}'>
+  <img src="assets/sampling/프로젝트/thumbnail.png" alt="프로젝트 제목">
+  <div class="overlay"><span>프로젝트 제목</span></div>
 </div>
 ```
 
-카테고리 값: `clothing` / `3dart` / `ai`
+- `data-title`: 라이트박스 상단 제목
+- `data-tools`: 콤마 구분 툴 목록 → 라이트박스 하단 뱃지
+- `data-images`: 라이트박스 이미지/영상 경로 (JSON 배열, 순서대로 표시)
+- `data-captions`: 파일명별 하단 레이블 (선택사항)
+- `img src`: 갤러리 카드 썸네일 → `thumbnail.png` 사용
+
+파일 명명 규칙은 `docs/conventions.md` 참고.
 
 ---
 
-## 색상 변경 방법
+## 색상 변경
 
-`css/base.css` 상단의 `:root` 블록에서 변경:
+`css/base.css` 상단 `:root` 블록에서 변경:
 
 ```css
 :root {
