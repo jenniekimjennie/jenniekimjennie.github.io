@@ -69,8 +69,10 @@ section {
 
 @media (max-width: 768px) {
   nav {
-    padding: 0 20px;
     height: 60px;
+  }
+  .nav-inner {
+    padding: 0 20px;
   }
   .nav-links {
     gap: 20px;

@@ -453,10 +453,14 @@ function preloadItem(item) {
 }
 
 window.addEventListener('load', () => {
-  document.querySelectorAll('.gallery-carousel').forEach(carousel => initCarousel(carousel));
-  document.querySelectorAll('.gallery-item').forEach(item => {
-    item.addEventListener('mouseenter', () => preloadItem(item));
-    item.addEventListener('touchstart', () => preloadItem(item), { passive: true });
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.gallery-carousel').forEach(carousel => initCarousel(carousel));
+      document.querySelectorAll('.gallery-item').forEach(item => {
+        item.addEventListener('mouseenter', () => preloadItem(item));
+        item.addEventListener('touchstart', () => preloadItem(item), { passive: true });
+      });
+    });
   });
 });
 
