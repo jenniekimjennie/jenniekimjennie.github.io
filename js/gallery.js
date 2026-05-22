@@ -56,8 +56,12 @@ function openLightbox(item) {
         flatImg.className = 'ftg-flat';
         const taglessImg = Object.assign(document.createElement('img'), { src: trio.tagless, alt: title, loading: 'eager' });
         taglessImg.className = 'ftg-tagless';
+        const ftgHint = document.createElement('div');
+        ftgHint.className = 'click-hint';
+        ftgHint.textContent = 'CLICK FOR DETAIL';
         wrap.appendChild(flatImg);
         wrap.appendChild(taglessImg);
+        wrap.appendChild(ftgHint);
         wrap.addEventListener('click', () => showZoom([trio.flat, trio.fabric, trio.tagless], ['FLAT INPUT', 'FABRIC INPUT', 'FINAL OUTPUT']));
         rowEl.appendChild(wrap);
       });
@@ -198,8 +202,12 @@ function openLightbox(item) {
             fsImg.className = 'hover-fullshot';
             const cuImg = Object.assign(document.createElement('img'), { src: closeupSrc, alt: title, loading: 'eager' });
             cuImg.className = 'hover-closeup';
+            const pairHint = document.createElement('div');
+            pairHint.className = 'click-hint';
+            pairHint.textContent = 'CLICK FOR DETAIL';
             wrapper.appendChild(fsImg);
             wrapper.appendChild(cuImg);
+            wrapper.appendChild(pairHint);
             rowEl.appendChild(wrapper);
             return;
           }
@@ -216,6 +224,11 @@ function openLightbox(item) {
           const hint = document.createElement('div');
           hint.className = 'sound-hint';
           hint.textContent = 'CLICK FOR SOUND';
+          wrap.appendChild(hint);
+        } else {
+          const hint = document.createElement('div');
+          hint.className = 'click-hint';
+          hint.textContent = 'CLICK FOR DETAIL';
           wrap.appendChild(hint);
         }
         const caption = captions[filename];
