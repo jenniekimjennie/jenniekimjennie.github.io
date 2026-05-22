@@ -130,8 +130,12 @@ function openLightbox(item) {
           src: model.video, loop: true, muted: true, playsInline: true
         });
         video.className = 'amf-video';
+        const hint = document.createElement('div');
+        hint.className = 'amf-hint';
+        hint.textContent = 'CLICK FOR DETAIL';
         wrap.appendChild(fittingImg);
         wrap.appendChild(video);
+        wrap.appendChild(hint);
         wrap.addEventListener('mouseenter', () => video.play());
         wrap.addEventListener('mouseleave', () => { video.pause(); video.currentTime = 0; });
         wrap.addEventListener('click', () => showAMFDetail(model, title));

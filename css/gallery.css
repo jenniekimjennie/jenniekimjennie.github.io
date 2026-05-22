@@ -463,6 +463,27 @@
   flex-shrink: 0;
 }
 
+.amf-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0);
+  background: rgba(0, 0, 0, 0);
+  transition: color 0.3s ease, background 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.amf-item:hover .amf-hint {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.35);
+}
+
 .amf-item .amf-fitting {
   width: 100%;
   height: auto;
