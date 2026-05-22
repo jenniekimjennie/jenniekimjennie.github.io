@@ -416,7 +416,9 @@ function initCarousel(carousel) {
   });
 }
 
-document.querySelectorAll('.gallery-carousel').forEach(carousel => initCarousel(carousel));
+window.addEventListener('load', () => {
+  document.querySelectorAll('.gallery-carousel').forEach(carousel => initCarousel(carousel));
+});
 
 // 페이지 로드 완료 후 라이트박스 이미지/영상 백그라운드 프리로드
 window.addEventListener('load', () => {
