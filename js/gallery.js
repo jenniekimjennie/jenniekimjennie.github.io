@@ -53,9 +53,9 @@ function openLightbox(item) {
             const wrapper = document.createElement('div');
             wrapper.className = 'hover-pair';
             wrapper.style.flex = `0 0 ${width}`;
-            const fsImg = Object.assign(document.createElement('img'), { src, alt: title, loading: 'lazy' });
+            const fsImg = Object.assign(document.createElement('img'), { src, alt: title, loading: 'eager' });
             fsImg.className = 'hover-fullshot';
-            const cuImg = Object.assign(document.createElement('img'), { src: closeupSrc, alt: title, loading: 'lazy' });
+            const cuImg = Object.assign(document.createElement('img'), { src: closeupSrc, alt: title, loading: 'eager' });
             cuImg.className = 'hover-closeup';
             wrapper.appendChild(fsImg);
             wrapper.appendChild(cuImg);
@@ -66,7 +66,7 @@ function openLightbox(item) {
 
         const el = src.match(/\.(mp4|webm|mov)$/i)
           ? Object.assign(document.createElement('video'), { src, autoplay: true, loop: true, muted: true, playsInline: true })
-          : Object.assign(document.createElement('img'), { src, alt: title, loading: 'lazy' });
+          : Object.assign(document.createElement('img'), { src, alt: title, loading: 'eager' });
         const wrap = document.createElement('div');
         wrap.className = 'media-item';
         wrap.style.flex = `0 0 ${width}`;
@@ -93,7 +93,7 @@ function openLightbox(item) {
     images.forEach(src => {
       const el = src.match(/\.(mp4|webm|mov)$/i)
         ? Object.assign(document.createElement('video'), { src, autoplay: true, loop: true, muted: true, playsInline: true })
-        : Object.assign(document.createElement('img'), { src, alt: title, loading: 'lazy' });
+        : Object.assign(document.createElement('img'), { src, alt: title, loading: 'eager' });
       const wrap = document.createElement('div');
       wrap.className = 'media-item';
       wrap.appendChild(el);
