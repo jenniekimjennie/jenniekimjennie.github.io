@@ -5,11 +5,18 @@ nav {
   z-index: 100;
   height: var(--nav-height);
   display: flex;
+  justify-content: center;
+  background: transparent;
+  transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
+}
+
+.nav-inner {
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 48px;
-  background: transparent;
-  transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
 }
 
 nav.scrolled {

@@ -2,6 +2,9 @@
 .gallery-section {
   padding-top: 80px;
   padding-bottom: 60px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .gallery-heading {

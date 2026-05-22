@@ -265,6 +265,9 @@ function openLightbox(item) {
   document.body.style.overflow = 'hidden';
 }
 
+const _resizeFns = [];
+let _resizeTimer;
+
 function initCarousel(carousel) {
   const viewport = carousel.querySelector('.carousel-viewport');
   const grid = carousel.querySelector('.gallery-grid');
@@ -287,16 +290,7 @@ function initCarousel(carousel) {
   }
 
   const gap = 12;
-  const viewportWidth = viewport.offsetWidth;
-  const isMobile = window.innerWidth <= 768;
-  const visibleCount = isMobile ? 1 : Math.min(count, 3);
-  const hasOverflow = count > visibleCount;
-  const itemWidth = Math.floor((viewportWidth - gap * (visibleCount - 1)) / visibleCount);
-  const step = itemWidth + gap;
-  const maxIndex = count - visibleCount;
-
-  items.forEach(item => { item.style.width = itemWidth + 'px'; });
-
+  let visibleCount, itemWidth, step, maxIndex;
   let currentIndex = 0;
   let isTransitioning = false;
 
@@ -346,9 +340,20 @@ function initCarousel(carousel) {
     });
   }
 
-  setPosition(0, false);
-  updateArrows();
-  updateDots();
+  function recalcLayout() {
+    visibleCount = window.innerWidth <= 768 ? 1 : Math.min(count, 3);
+    itemWidth = Math.floor((viewport.offsetWidth - gap * (visibleCount - 1)) / visibleCount);
+    step = itemWidth + gap;
+    maxIndex = count - visibleCount;
+    items.forEach(item => { item.style.width = itemWidth + 'px'; });
+    if (currentIndex > maxIndex) currentIndex = maxIndex;
+    setPosition(currentIndex, false);
+    updateArrows();
+    updateDots();
+  }
+
+  recalcLayout();
+  _resizeFns.push(recalcLayout);
 
   grid.addEventListener('transitionend', e => {
     if (e.propertyName !== 'transform') return;
@@ -422,6 +427,11 @@ function initCarousel(carousel) {
 
 window.addEventListener('load', () => {
   document.querySelectorAll('.gallery-carousel').forEach(carousel => initCarousel(carousel));
+});
+
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => _resizeFns.forEach(fn => fn()), 150);
 });
 
 // 페이지 로드 완료 후 라이트박스 이미지/영상 백그라운드 프리로드
