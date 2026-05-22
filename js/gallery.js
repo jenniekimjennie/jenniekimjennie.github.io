@@ -467,14 +467,14 @@ function showAMFDetail(model, title) {
 
   // 좌측: 영상
   const colLeft = document.createElement('div');
-  colLeft.style.cssText = 'flex:0 0 auto;overflow:hidden;cursor:zoom-in;';
+  colLeft.style.cssText = 'flex:0 0 auto;overflow:hidden;cursor:zoom-in;transition:transform 0.3s ease,opacity 0.3s ease;';
   const video = Object.assign(document.createElement('video'), {
     src: model.video, autoplay: true, loop: true, muted: true, playsInline: true
   });
-  video.style.cssText = 'height:100%;width:auto;display:block;transition:opacity 0.3s ease;';
+  video.style.cssText = 'height:100%;width:auto;display:block;';
   colLeft.appendChild(video);
-  colLeft.addEventListener('mouseenter', () => video.style.opacity = '0.85');
-  colLeft.addEventListener('mouseleave', () => video.style.opacity = '1');
+  colLeft.addEventListener('mouseenter', () => { colLeft.style.transform = 'scale(1.03)'; colLeft.style.opacity = '0.85'; });
+  colLeft.addEventListener('mouseleave', () => { colLeft.style.transform = ''; colLeft.style.opacity = ''; });
   colLeft.addEventListener('click', e => {
     e.stopPropagation();
     zoomContent.style.cssText = '';
@@ -493,12 +493,12 @@ function showAMFDetail(model, title) {
   ['model', 'top', 'bottom', 'shoes'].forEach(tag => {
     if (!model[tag]) return;
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'flex:1;overflow:hidden;cursor:zoom-in;';
+    wrap.style.cssText = 'flex:1;overflow:hidden;cursor:zoom-in;transition:transform 0.3s ease,opacity 0.3s ease;';
     const img = Object.assign(document.createElement('img'), { src: model[tag], loading: 'eager' });
-    img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;transition:transform 0.3s ease,opacity 0.3s ease;';
+    img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
     wrap.appendChild(img);
-    wrap.addEventListener('mouseenter', () => { img.style.transform = 'scale(1.04)'; img.style.opacity = '0.85'; });
-    wrap.addEventListener('mouseleave', () => { img.style.transform = ''; img.style.opacity = ''; });
+    wrap.addEventListener('mouseenter', () => { wrap.style.transform = 'scale(1.03)'; wrap.style.opacity = '0.85'; });
+    wrap.addEventListener('mouseleave', () => { wrap.style.transform = ''; wrap.style.opacity = ''; });
     wrap.addEventListener('click', e => {
       e.stopPropagation();
       _inAMFDetailZoom = true;
