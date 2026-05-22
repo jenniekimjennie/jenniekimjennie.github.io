@@ -425,30 +425,31 @@ function initCarousel(carousel) {
   });
 }
 
+function preloadItem(item) {
+  if (item._preloaded) return;
+  item._preloaded = true;
+  let srcs = [];
+  try { srcs = JSON.parse(item.dataset.images || '[]'); } catch(e) {}
+  srcs.forEach(src => {
+    if (src.match(/\.(mp4|webm|mov)$/i)) {
+      fetch(src).catch(() => {});
+    } else {
+      new Image().src = src;
+    }
+  });
+}
+
 window.addEventListener('load', () => {
   document.querySelectorAll('.gallery-carousel').forEach(carousel => initCarousel(carousel));
+  document.querySelectorAll('.gallery-item').forEach(item => {
+    item.addEventListener('mouseenter', () => preloadItem(item));
+    item.addEventListener('touchstart', () => preloadItem(item), { passive: true });
+  });
 });
 
 window.addEventListener('resize', () => {
   clearTimeout(_resizeTimer);
   _resizeTimer = setTimeout(() => _resizeFns.forEach(fn => fn()), 150);
-});
-
-// 페이지 로드 완료 후 라이트박스 이미지/영상 백그라운드 프리로드
-window.addEventListener('load', () => {
-  const allSrcs = [];
-  document.querySelectorAll('.gallery-item').forEach(item => {
-    try {
-      JSON.parse(item.dataset.images || '[]').forEach(src => allSrcs.push(src));
-    } catch (e) {}
-  });
-  allSrcs.forEach(src => {
-    if (src.match(/\.(mp4|webm|mov)$/i)) {
-      fetch(src, { priority: 'low' }).catch(() => {});
-    } else {
-      new Image().src = src;
-    }
-  });
 });
 
 // ─── ZOOM ───
