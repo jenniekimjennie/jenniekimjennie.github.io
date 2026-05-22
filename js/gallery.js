@@ -278,8 +278,6 @@ function openLightbox(item) {
   document.body.style.overflow = 'hidden';
 }
 
-const _resizeFns = [];
-let _resizeTimer;
 
 function initCarousel(carousel) {
   const viewport = carousel.querySelector('.carousel-viewport');
@@ -354,8 +352,10 @@ function initCarousel(carousel) {
   }
 
   function recalcLayout() {
+    const w = viewport.offsetWidth;
+    if (w <= 0) return;
     visibleCount = window.innerWidth <= 768 ? 1 : Math.min(count, 3);
-    itemWidth = Math.floor((viewport.offsetWidth - gap * (visibleCount - 1)) / visibleCount);
+    itemWidth = Math.floor((w - gap * (visibleCount - 1)) / visibleCount);
     step = itemWidth + gap;
     maxIndex = count - visibleCount;
     items.forEach(item => { item.style.width = itemWidth + 'px'; });
@@ -366,7 +366,7 @@ function initCarousel(carousel) {
   }
 
   recalcLayout();
-  _resizeFns.push(recalcLayout);
+  new ResizeObserver(() => recalcLayout()).observe(viewport);
 
   grid.addEventListener('transitionend', e => {
     if (e.propertyName !== 'transform') return;
@@ -453,20 +453,11 @@ function preloadItem(item) {
 }
 
 window.addEventListener('load', () => {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      document.querySelectorAll('.gallery-carousel').forEach(carousel => initCarousel(carousel));
-      document.querySelectorAll('.gallery-item').forEach(item => {
-        item.addEventListener('mouseenter', () => preloadItem(item));
-        item.addEventListener('touchstart', () => preloadItem(item), { passive: true });
-      });
-    });
+  document.querySelectorAll('.gallery-carousel').forEach(carousel => initCarousel(carousel));
+  document.querySelectorAll('.gallery-item').forEach(item => {
+    item.addEventListener('mouseenter', () => preloadItem(item));
+    item.addEventListener('touchstart', () => preloadItem(item), { passive: true });
   });
-});
-
-window.addEventListener('resize', () => {
-  clearTimeout(_resizeTimer);
-  _resizeTimer = setTimeout(() => _resizeFns.forEach(fn => fn()), 150);
 });
 
 // ─── ZOOM ───
