@@ -1,11 +1,11 @@
 #hero {
-  min-height: 80vh;
+  min-height: 55vh;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding-top: calc(var(--nav-height) + 60px);
-  padding-bottom: 80px;
+  padding-top: calc(var(--nav-height) + 40px);
+  padding-bottom: 40px;
 }
 
 .hero-content {

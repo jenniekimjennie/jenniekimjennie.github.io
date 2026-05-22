@@ -17,6 +17,143 @@ function openLightbox(item) {
   lightboxTitle.textContent = title;
   lightboxScroll.innerHTML = '';
 
+  const mode = item.dataset.mode || '';
+
+  if (mode === 'ftg') {
+    lightboxScroll.className = 'lightbox-scroll layout-grid';
+
+    function getBaseKey(src) {
+      return src.split('/').pop()
+        .replace('_flat', '').replace('_fabric', '')
+        .replace(/_c\d+\.\w+$/, '');
+    }
+
+    const trioPairs = {};
+    images.forEach(src => {
+      const key = getBaseKey(src);
+      if (!trioPairs[key]) trioPairs[key] = {};
+      const filename = src.split('/').pop();
+      if (filename.includes('_flat_')) trioPairs[key].flat = src;
+      else if (filename.includes('_fabric_')) trioPairs[key].fabric = src;
+      else trioPairs[key].tagless = src;
+    });
+
+    const rowGroups = {};
+    Object.entries(trioPairs).forEach(([key, trio]) => {
+      const row = key.match(/^(\d+)/)?.[1] || '0';
+      if (!rowGroups[row]) rowGroups[row] = [];
+      rowGroups[row].push(trio);
+    });
+
+    Object.keys(rowGroups).sort().forEach(row => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'grid-row';
+      rowGroups[row].forEach(trio => {
+        const wrap = document.createElement('div');
+        wrap.className = 'ftg-triple';
+        wrap.style.flex = '0 0 calc(33.333% - 5.334px)';
+        const flatImg = Object.assign(document.createElement('img'), { src: trio.flat, alt: title, loading: 'eager' });
+        flatImg.className = 'ftg-flat';
+        const taglessImg = Object.assign(document.createElement('img'), { src: trio.tagless, alt: title, loading: 'eager' });
+        taglessImg.className = 'ftg-tagless';
+        wrap.appendChild(flatImg);
+        wrap.appendChild(taglessImg);
+        wrap.addEventListener('click', () => showZoom([trio.flat, trio.fabric, trio.tagless], ['FLAT INPUT', 'FABRIC INPUT', 'FINAL OUTPUT']));
+        rowEl.appendChild(wrap);
+      });
+      lightboxScroll.appendChild(rowEl);
+    });
+
+    const tools = (item.dataset.tools || '').split(',').map(t => t.trim()).filter(Boolean);
+    if (tools.length > 0) {
+      const toolsSection = document.createElement('div');
+      toolsSection.className = 'lightbox-tools';
+      toolsSection.innerHTML = `<div class="lightbox-tools-label">TOOL</div><div class="lightbox-tools-list">${tools.map(t => `<span>${t}</span>`).join('')}</div>`;
+      lightboxScroll.appendChild(toolsSection);
+    }
+
+    lightbox.classList.add('active');
+    lightboxScroll.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+
+  if (mode === 'amf') {
+    lightboxScroll.className = 'lightbox-scroll layout-grid';
+
+    function getAMFBaseKey(src) {
+      return src.split('/').pop()
+        .replace('_fitting', '').replace('_model', '').replace('_top', '')
+        .replace('_bottom', '').replace('_pants', '').replace('_shoes', '')
+        .replace('_video', '')
+        .replace(/_c\d+\.\w+$/, '');
+    }
+
+    function getAMFTag(src) {
+      const f = src.split('/').pop();
+      if (f.includes('_fitting_')) return 'fitting';
+      if (f.includes('_model_')) return 'model';
+      if (f.includes('_top_')) return 'top';
+      if (f.includes('_bottom_') || f.includes('_pants_')) return 'bottom';
+      if (f.includes('_shoes_')) return 'shoes';
+      if (f.match(/\.(mp4|webm|mov)$/i) || f.includes('_video_')) return 'video';
+      return 'bottom';
+    }
+
+    const models = {};
+    images.forEach(src => {
+      const key = getAMFBaseKey(src);
+      const tag = getAMFTag(src);
+      if (!models[key]) models[key] = {};
+      models[key][tag] = src;
+    });
+
+    const rowGroups = {};
+    Object.entries(models).forEach(([key, data]) => {
+      const row = key.match(/^(\d+)/)?.[1] || '0';
+      if (!rowGroups[row]) rowGroups[row] = [];
+      rowGroups[row].push({ key, ...data });
+    });
+
+    Object.keys(rowGroups).sort().forEach(row => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'grid-row';
+      rowGroups[row].forEach(model => {
+        const wrap = document.createElement('div');
+        wrap.className = 'amf-item';
+        wrap.style.flex = '0 0 calc(33.333% - 5.334px)';
+        const fittingImg = Object.assign(document.createElement('img'), {
+          src: model.fitting, alt: title, loading: 'eager'
+        });
+        fittingImg.className = 'amf-fitting';
+        const video = Object.assign(document.createElement('video'), {
+          src: model.video, loop: true, muted: true, playsInline: true
+        });
+        video.className = 'amf-video';
+        wrap.appendChild(fittingImg);
+        wrap.appendChild(video);
+        wrap.addEventListener('mouseenter', () => video.play());
+        wrap.addEventListener('mouseleave', () => { video.pause(); video.currentTime = 0; });
+        wrap.addEventListener('click', () => showAMFDetail(model, title));
+        rowEl.appendChild(wrap);
+      });
+      lightboxScroll.appendChild(rowEl);
+    });
+
+    const tools = (item.dataset.tools || '').split(',').map(t => t.trim()).filter(Boolean);
+    if (tools.length > 0) {
+      const toolsSection = document.createElement('div');
+      toolsSection.className = 'lightbox-tools';
+      toolsSection.innerHTML = `<div class="lightbox-tools-label">TOOL</div><div class="lightbox-tools-list">${tools.map(t => `<span>${t}</span>`).join('')}</div>`;
+      lightboxScroll.appendChild(toolsSection);
+    }
+
+    lightbox.classList.add('active');
+    lightboxScroll.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+
   const hasGrid = images.some(src => /_c\d+\./i.test(src));
   lightboxScroll.className = 'lightbox-scroll' + (hasGrid ? ' layout-grid' : '');
 
@@ -301,25 +438,107 @@ window.addEventListener('load', () => {
 // ─── ZOOM ───
 const zoomOverlay = document.createElement('div');
 zoomOverlay.className = 'lightbox-zoom';
+const zoomClose = document.createElement('button');
+zoomClose.className = 'lightbox-close';
+zoomClose.textContent = '✕';
+zoomOverlay.appendChild(zoomClose);
 const zoomContent = document.createElement('div');
 zoomContent.className = 'lightbox-zoom-content';
 zoomOverlay.appendChild(zoomContent);
 document.body.appendChild(zoomOverlay);
 
-function showZoom(srcs) {
+let _amfDetailModel = null;
+let _amfDetailTitle = null;
+let _inAMFDetailZoom = false;
+
+function showAMFDetail(model, title) {
+  _amfDetailModel = model;
+  _amfDetailTitle = title;
+  _inAMFDetailZoom = false;
+
   zoomContent.innerHTML = '';
-  zoomContent.className = 'lightbox-zoom-content' + (srcs.length > 1 ? ' zoom-pair' : '');
-  srcs.forEach(src => {
+  zoomContent.className = 'lightbox-zoom-content';
+  zoomContent.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:0;';
+
+  const inner = document.createElement('div');
+  inner.style.cssText = 'display:flex;flex-direction:row;gap:4px;align-items:stretch;height:85vh;';
+
+  // 좌측: 영상
+  const colLeft = document.createElement('div');
+  colLeft.style.cssText = 'flex:0 0 auto;overflow:hidden;cursor:zoom-in;';
+  const video = Object.assign(document.createElement('video'), {
+    src: model.video, autoplay: true, loop: true, muted: true, playsInline: true
+  });
+  video.style.cssText = 'height:100%;width:auto;display:block;transition:opacity 0.3s ease;';
+  colLeft.appendChild(video);
+  colLeft.addEventListener('mouseenter', () => video.style.opacity = '0.85');
+  colLeft.addEventListener('mouseleave', () => video.style.opacity = '1');
+  colLeft.addEventListener('click', e => {
+    e.stopPropagation();
+    zoomContent.style.cssText = '';
+    zoomContent.innerHTML = '';
+    zoomContent.className = 'lightbox-zoom-content';
+    const v = Object.assign(document.createElement('video'), {
+      src: model.video, autoplay: true, loop: true, muted: true, playsInline: true
+    });
+    v.style.cssText = 'max-width:90vw;max-height:90vh;object-fit:contain;';
+    zoomContent.appendChild(v);
+  });
+
+  // 우측: model / top / bottom / shoes 세로 나열
+  const colRight = document.createElement('div');
+  colRight.style.cssText = 'flex:0 0 auto;width:22vw;display:flex;flex-direction:column;gap:4px;';
+  ['model', 'top', 'bottom', 'shoes'].forEach(tag => {
+    if (!model[tag]) return;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'flex:1;overflow:hidden;cursor:zoom-in;';
+    const img = Object.assign(document.createElement('img'), { src: model[tag], loading: 'eager' });
+    img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;transition:transform 0.3s ease,opacity 0.3s ease;';
+    wrap.appendChild(img);
+    wrap.addEventListener('mouseenter', () => { img.style.transform = 'scale(1.04)'; img.style.opacity = '0.85'; });
+    wrap.addEventListener('mouseleave', () => { img.style.transform = ''; img.style.opacity = ''; });
+    wrap.addEventListener('click', e => {
+      e.stopPropagation();
+      _inAMFDetailZoom = true;
+      showZoom([img.src]);
+    });
+    colRight.appendChild(wrap);
+  });
+
+  inner.appendChild(colLeft);
+  inner.appendChild(colRight);
+  zoomContent.appendChild(inner);
+  zoomOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function showZoom(srcs, labels) {
+  zoomContent.innerHTML = '';
+  zoomContent.className = 'lightbox-zoom-content' + (srcs.length === 3 ? ' zoom-triple' : srcs.length > 1 ? ' zoom-pair' : '');
+  srcs.forEach((src, i) => {
     const el = src.match(/\.(mp4|webm|mov)$/i)
-      ? Object.assign(document.createElement('video'), { src, autoplay: true, loop: true, playsInline: true, controls: true })
+      ? Object.assign(document.createElement('video'), { src, autoplay: true, loop: true, muted: true, playsInline: true, controls: true })
       : Object.assign(document.createElement('img'), { src });
-    zoomContent.appendChild(el);
+    if (labels && labels[i]) {
+      const wrap = document.createElement('div');
+      wrap.className = 'zoom-item';
+      wrap.appendChild(el);
+      const label = document.createElement('div');
+      label.className = 'zoom-label';
+      label.textContent = labels[i];
+      wrap.appendChild(label);
+      zoomContent.appendChild(wrap);
+    } else {
+      zoomContent.appendChild(el);
+    }
   });
   zoomOverlay.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
 
 lightboxScroll.addEventListener('click', e => {
+  if (e.target.closest('.ftg-triple')) return;
+  if (e.target.closest('.amf-item')) return;
   const pair = e.target.closest('.hover-pair');
   if (pair) {
     const fs = pair.querySelector('.hover-fullshot');
@@ -332,13 +551,39 @@ lightboxScroll.addEventListener('click', e => {
   }
 });
 
-zoomOverlay.addEventListener('click', () => {
+function closeZoomOverlay() {
   zoomOverlay.classList.remove('active');
   zoomContent.querySelectorAll('video').forEach(v => v.pause());
+  zoomContent.style.cssText = '';
+}
+
+zoomOverlay.addEventListener('click', e => {
+  if (e.target === zoomOverlay) {
+    if (_inAMFDetailZoom) {
+      _inAMFDetailZoom = false;
+      showAMFDetail(_amfDetailModel, _amfDetailTitle);
+    } else {
+      closeZoomOverlay();
+    }
+    return;
+  }
+  const media = e.target.closest('img');
+  if (media && zoomContent.querySelectorAll('img, video').length > 1) {
+    showZoom([media.src]);
+  }
+});
+
+zoomClose.addEventListener('click', () => {
+  if (_inAMFDetailZoom) {
+    _inAMFDetailZoom = false;
+    showAMFDetail(_amfDetailModel, _amfDetailTitle);
+  } else {
+    closeZoomOverlay();
+  }
 });
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') zoomOverlay.classList.remove('active');
+  if (e.key === 'Escape') closeZoomOverlay();
 });
 
 function closeLightbox() {

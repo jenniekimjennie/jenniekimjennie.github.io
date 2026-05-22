@@ -27,9 +27,39 @@
 }
 
 .about-bio {
-  font-size: 15px;
-  line-height: 1.8;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.about-tagline {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.about-quote {
+  font-size: 16px;
+  line-height: 1.9;
   color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ─── SKILLS + INFO 2열 레이아웃 ─── */
+.skills-info-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding-top: 48px;
+  border-top: 1px solid var(--color-border);
+  align-items: start;
+}
+
+.skills-col {
+  padding-right: 80px;
+  border-right: 1px solid var(--color-border);
 }
 
 /* ─── TOOL BADGES ─── */
@@ -38,18 +68,21 @@
   font-weight: 700;
   letter-spacing: 3px;
   color: var(--color-text-faint);
-  margin-bottom: 24px;
-  padding-top: 48px;
-  border-top: 1px solid var(--color-border);
+  margin-bottom: 32px;
 }
 
 .tools-section {
   display: flex;
-  gap: 56px;
-  flex-wrap: wrap;
-  margin-bottom: 0;
-  padding-bottom: 40px;
-  border-bottom: 1px solid var(--color-border);
+  flex-direction: column;
+  gap: 0;
+}
+
+.tools-group {
+  padding: 32px 0 0;
+}
+
+.tools-group:first-child {
+  padding-top: 0;
 }
 
 .tools-group h3 {
@@ -57,7 +90,9 @@
   font-weight: 700;
   letter-spacing: 3px;
   color: var(--color-text-faint);
-  margin-bottom: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .tools-badges {
@@ -76,11 +111,19 @@
 }
 
 /* ─── EXPERIENCE / EDUCATION / AWARDS ─── */
-.info-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 48px;
-  padding-top: 32px;
+.info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 80px;
+}
+
+.info-col > .tools-title {
+  margin-bottom: 32px;
+}
+
+.info-section + .info-section {
+  padding-top: 40px;
 }
 
 .info-section h3 {
@@ -96,11 +139,6 @@
 .info-entry {
   margin-bottom: 20px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.info-entry:last-child {
-  border-bottom: none;
 }
 
 .entry-header {
@@ -115,6 +153,7 @@
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 1px;
+  color: var(--color-text-muted);
 }
 
 .entry-role {
@@ -150,13 +189,17 @@
     margin-left: 0;
     margin-top: 8px;
   }
-  .tools-section {
-    gap: 24px;
+  .skills-info-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .skills-col {
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
     padding-bottom: 40px;
   }
-  .info-row {
-    grid-template-columns: 1fr;
-    gap: 32px;
-    padding-top: 32px;
+  .info-col {
+    padding-left: 0;
   }
 }
