@@ -281,31 +281,21 @@ function initCarousel(carousel) {
 
 document.querySelectorAll('.gallery-carousel').forEach(carousel => initCarousel(carousel));
 
-// 페이지 로드 완료 후 라이트박스 이미지 백그라운드 프리로드
+// 페이지 로드 완료 후 라이트박스 이미지/영상 백그라운드 프리로드
 window.addEventListener('load', () => {
-  const allImages = [];
+  const allSrcs = [];
   document.querySelectorAll('.gallery-item').forEach(item => {
     try {
-      const images = JSON.parse(item.dataset.images || '[]');
-      images.forEach(src => allImages.push(src));
+      JSON.parse(item.dataset.images || '[]').forEach(src => allSrcs.push(src));
     } catch (e) {}
   });
-  let i = 0;
-  function loadNext() {
-    if (i >= allImages.length) return;
-    const src = allImages[i++];
+  allSrcs.forEach(src => {
     if (src.match(/\.(mp4|webm|mov)$/i)) {
-      const v = document.createElement('video');
-      v.preload = 'auto';
-      v.src = src;
-      loadNext();
+      fetch(src, { priority: 'low' }).catch(() => {});
     } else {
-      const img = new Image();
-      img.onload = img.onerror = loadNext;
-      img.src = src;
+      new Image().src = src;
     }
-  }
-  loadNext();
+  });
 });
 
 // ─── ZOOM ───
