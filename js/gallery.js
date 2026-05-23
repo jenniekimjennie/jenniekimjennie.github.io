@@ -16,7 +16,7 @@ function addSpinner(wrapper, media) {
     media.addEventListener('load', done, { once: true });
     media.addEventListener('error', done, { once: true });
   } else {
-    if (media.readyState >= 3) { done(); return; }
+    if (media.readyState >= 2) { done(); return; }
     media.addEventListener('loadeddata', done, { once: true });
     media.addEventListener('error', done, { once: true });
   }
@@ -518,12 +518,13 @@ function showAMFDetail(model, title) {
 
   // 좌측: 영상
   const colLeft = document.createElement('div');
-  colLeft.style.cssText = 'flex:0 0 auto;overflow:hidden;cursor:zoom-in;transition:transform 0.3s ease,opacity 0.3s ease;';
+  colLeft.style.cssText = 'flex:0 0 auto;overflow:hidden;cursor:zoom-in;transition:transform 0.3s ease,opacity 0.3s ease;position:relative;';
   const video = Object.assign(document.createElement('video'), {
     src: model.video, autoplay: true, loop: true, muted: true, playsInline: true
   });
   video.style.cssText = 'height:100%;width:auto;display:block;';
   colLeft.appendChild(video);
+  addSpinner(colLeft, video);
   colLeft.addEventListener('mouseenter', () => { colLeft.style.transform = 'scale(1.03)'; colLeft.style.opacity = '0.85'; });
   colLeft.addEventListener('mouseleave', () => { colLeft.style.transform = ''; colLeft.style.opacity = ''; });
   colLeft.addEventListener('click', e => {
@@ -536,6 +537,7 @@ function showAMFDetail(model, title) {
     });
     v.style.cssText = 'max-width:90vw;max-height:90vh;object-fit:contain;';
     zoomContent.appendChild(v);
+    addZoomSpinner([v]);
   });
 
   // 우측: model / top / bottom / shoes 세로 나열
@@ -544,10 +546,11 @@ function showAMFDetail(model, title) {
   ['model', 'top', 'bottom', 'shoes'].forEach(tag => {
     if (!model[tag]) return;
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'flex:1;overflow:hidden;cursor:zoom-in;transition:transform 0.3s ease,opacity 0.3s ease;';
+    wrap.style.cssText = 'flex:1;overflow:hidden;cursor:zoom-in;transition:transform 0.3s ease,opacity 0.3s ease;position:relative;';
     const img = Object.assign(document.createElement('img'), { src: model[tag], loading: 'eager' });
     img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
     wrap.appendChild(img);
+    addSpinner(wrap, img);
     wrap.addEventListener('mouseenter', () => { wrap.style.transform = 'scale(1.03)'; wrap.style.opacity = '0.85'; });
     wrap.addEventListener('mouseleave', () => { wrap.style.transform = ''; wrap.style.opacity = ''; });
     wrap.addEventListener('click', e => {
@@ -565,13 +568,41 @@ function showAMFDetail(model, title) {
   document.body.style.overflow = 'hidden';
 }
 
+function addZoomSpinner(mediaEls) {
+  zoomOverlay.querySelectorAll('.zoom-spinner').forEach(s => s.remove());
+  const spinner = document.createElement('div');
+  spinner.className = 'spinner zoom-spinner';
+  zoomOverlay.appendChild(spinner);
+  let remaining = mediaEls.length;
+  const onLoad = () => {
+    remaining--;
+    if (remaining <= 0) {
+      spinner.classList.add('done');
+      setTimeout(() => spinner.remove(), 300);
+    }
+  };
+  mediaEls.forEach(el => {
+    if (el.tagName === 'IMG') {
+      if (el.complete && el.naturalWidth > 0) { onLoad(); return; }
+      el.addEventListener('load', onLoad, { once: true });
+      el.addEventListener('error', onLoad, { once: true });
+    } else {
+      if (el.readyState >= 2) { onLoad(); return; }
+      el.addEventListener('loadeddata', onLoad, { once: true });
+      el.addEventListener('error', onLoad, { once: true });
+    }
+  });
+}
+
 function showZoom(srcs, labels) {
   zoomContent.innerHTML = '';
   zoomContent.className = 'lightbox-zoom-content' + (srcs.length === 3 ? ' zoom-triple' : srcs.length > 1 ? ' zoom-pair' : '');
+  const mediaEls = [];
   srcs.forEach((src, i) => {
     const el = src.match(/\.(mp4|webm|mov)$/i)
       ? Object.assign(document.createElement('video'), { src, autoplay: true, loop: true, muted: true, playsInline: true, controls: true })
       : Object.assign(document.createElement('img'), { src });
+    mediaEls.push(el);
     if (labels && labels[i]) {
       const wrap = document.createElement('div');
       wrap.className = 'zoom-item';
@@ -585,6 +616,7 @@ function showZoom(srcs, labels) {
       zoomContent.appendChild(el);
     }
   });
+  addZoomSpinner(mediaEls);
   zoomOverlay.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
