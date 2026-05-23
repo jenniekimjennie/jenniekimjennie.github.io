@@ -351,8 +351,8 @@ function initCarousel(carousel) {
     });
   }
 
-  function recalcLayout() {
-    const w = viewport.offsetWidth;
+  function recalcLayout(w) {
+    w = w || viewport.offsetWidth;
     if (w <= 0) return;
     visibleCount = window.innerWidth <= 768 ? 1 : Math.min(count, 3);
     itemWidth = Math.floor((w - gap * (visibleCount - 1)) / visibleCount);
@@ -365,8 +365,12 @@ function initCarousel(carousel) {
     updateDots();
   }
 
+  new ResizeObserver(entries => {
+    const w = entries[0].contentRect.width;
+    if (w > 0) recalcLayout(w);
+  }).observe(viewport);
+
   recalcLayout();
-  new ResizeObserver(() => recalcLayout()).observe(viewport);
 
   grid.addEventListener('transitionend', e => {
     if (e.propertyName !== 'transform') return;
