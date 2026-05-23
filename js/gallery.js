@@ -3,6 +3,25 @@ const lightboxScroll = document.querySelector('.lightbox-scroll');
 const lightboxTitle = document.querySelector('.lightbox-title');
 const lightboxClose = document.querySelector('.lightbox-close');
 
+function addSpinner(wrapper, media) {
+  const spinner = document.createElement('div');
+  spinner.className = 'spinner';
+  wrapper.appendChild(spinner);
+  const done = () => {
+    spinner.classList.add('done');
+    setTimeout(() => spinner.remove(), 300);
+  };
+  if (media.tagName === 'IMG') {
+    if (media.complete && media.naturalWidth > 0) { done(); return; }
+    media.addEventListener('load', done, { once: true });
+    media.addEventListener('error', done, { once: true });
+  } else {
+    if (media.readyState >= 3) { done(); return; }
+    media.addEventListener('loadeddata', done, { once: true });
+    media.addEventListener('error', done, { once: true });
+  }
+}
+
 function openLightbox(item) {
   let images = [];
   try {
@@ -62,6 +81,7 @@ function openLightbox(item) {
         wrap.appendChild(flatImg);
         wrap.appendChild(taglessImg);
         wrap.appendChild(ftgHint);
+        addSpinner(wrap, flatImg);
         wrap.addEventListener('click', () => showZoom([trio.flat, trio.fabric, trio.tagless], ['FLAT INPUT', 'FABRIC INPUT', 'FINAL OUTPUT']));
         rowEl.appendChild(wrap);
       });
@@ -140,6 +160,7 @@ function openLightbox(item) {
         wrap.appendChild(fittingImg);
         wrap.appendChild(video);
         wrap.appendChild(hint);
+        addSpinner(wrap, fittingImg);
         wrap.addEventListener('mouseenter', () => video.play());
         wrap.addEventListener('mouseleave', () => { video.pause(); video.currentTime = 0; });
         wrap.addEventListener('click', () => showAMFDetail(model, title));
@@ -208,6 +229,7 @@ function openLightbox(item) {
             wrapper.appendChild(fsImg);
             wrapper.appendChild(cuImg);
             wrapper.appendChild(pairHint);
+            addSpinner(wrapper, fsImg);
             rowEl.appendChild(wrapper);
             return;
           }
@@ -220,6 +242,7 @@ function openLightbox(item) {
         wrap.className = 'media-item';
         wrap.style.flex = `0 0 ${width}`;
         wrap.appendChild(el);
+        addSpinner(wrap, el);
         if (hasSoundHint && el.tagName === 'VIDEO') {
           const hint = document.createElement('div');
           hint.className = 'sound-hint';
@@ -251,6 +274,7 @@ function openLightbox(item) {
       const wrap = document.createElement('div');
       wrap.className = 'media-item';
       wrap.appendChild(el);
+      addSpinner(wrap, el);
       if (hasSoundHint && el.tagName === 'VIDEO') {
         const hint = document.createElement('div');
         hint.className = 'sound-hint';
