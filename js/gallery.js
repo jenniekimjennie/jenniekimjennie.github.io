@@ -354,7 +354,7 @@ function initCarousel(carousel) {
   function recalcLayout(w) {
     w = w || viewport.offsetWidth;
     if (w <= 0) return;
-    visibleCount = window.innerWidth <= 768 ? 1 : Math.min(count, 3);
+    visibleCount = window.innerWidth <= 768 ? 1 : window.innerWidth <= 1024 ? Math.min(count, 2) : Math.min(count, 3);
     itemWidth = Math.floor((w - gap * (visibleCount - 1)) / visibleCount);
     step = itemWidth + gap;
     maxIndex = count - visibleCount;
@@ -582,7 +582,11 @@ lightboxScroll.addEventListener('click', e => {
 
 function closeZoomOverlay() {
   zoomOverlay.classList.remove('active');
-  zoomContent.querySelectorAll('video').forEach(v => v.pause());
+  zoomContent.querySelectorAll('video').forEach(v => {
+    v.pause();
+    v.src = '';
+    v.load();
+  });
   zoomContent.style.cssText = '';
 }
 
@@ -618,7 +622,11 @@ document.addEventListener('keydown', e => {
 function closeLightbox() {
   lightbox.classList.remove('active');
   document.body.style.overflow = '';
-  lightboxScroll.querySelectorAll('video').forEach(v => v.pause());
+  lightboxScroll.querySelectorAll('video').forEach(v => {
+    v.pause();
+    v.src = '';
+    v.load();
+  });
 }
 
 lightboxClose.addEventListener('click', closeLightbox);
