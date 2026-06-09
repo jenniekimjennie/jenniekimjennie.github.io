@@ -67,6 +67,11 @@ section {
   transform: translateY(0);
 }
 
+/* ─── HERO-ONLY MODE ─── */
+body.hero-only section:not(#hero) {
+  display: none;
+}
+
 @media (max-width: 768px) {
   nav {
     height: 60px;

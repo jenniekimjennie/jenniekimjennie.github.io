@@ -1,3 +1,14 @@
+const heroCta = document.getElementById('hero-cta');
+if (heroCta) {
+  heroCta.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.body.classList.remove('hero-only');
+    setTimeout(() => {
+      document.getElementById('gallery-clo').scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+  });
+}
+
 const nav = document.querySelector('nav');
 let _navRaf = null;
 
