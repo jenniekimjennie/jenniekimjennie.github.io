@@ -120,7 +120,7 @@
 }
 
 .info-section + .info-section {
-  padding-top: 40px;
+  padding-top: 20px;
 }
 
 .info-section h3 {
@@ -134,8 +134,8 @@
 }
 
 .info-entry {
-  margin-bottom: 20px;
-  padding-bottom: 20px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
 }
 
 .entry-header {

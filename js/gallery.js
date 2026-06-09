@@ -184,7 +184,8 @@ function openLightbox(item) {
   }
 
   const hasGrid = images.some(src => /_c\d+\./i.test(src));
-  lightboxScroll.className = 'lightbox-scroll' + (hasGrid ? ' layout-grid' : '');
+  const titleSlug = 'lb-' + title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  lightboxScroll.className = 'lightbox-scroll' + (hasGrid ? ' layout-grid' : '') + ' ' + titleSlug;
 
   if (hasGrid) {
     const colWidths = { 1: '100%', 2: 'calc(50% - 4px)', 3: 'calc(33.333% - 5.334px)', 4: 'calc(25% - 6px)' };
