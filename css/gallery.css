@@ -275,6 +275,24 @@
   object-fit: contain;
 }
 
+.lightbox-scroll.lb-display {
+  display: block;
+}
+
+.lightbox-scroll.lb-display .media-item {
+  aspect-ratio: unset;
+  width: 50%;
+  margin: 0 auto 8px;
+}
+
+.lightbox-scroll.lb-display .media-item img,
+.lightbox-scroll.lb-display .media-item video {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: unset;
+}
+
 .lightbox-scroll:not(.layout-grid) .lightbox-tools {
   grid-column: 1 / -1;
 }
