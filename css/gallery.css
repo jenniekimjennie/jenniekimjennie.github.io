@@ -2,9 +2,6 @@
 .gallery-section {
   padding-top: 80px;
   padding-bottom: 60px;
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .gallery-heading {
@@ -258,44 +255,74 @@
 .lightbox-scroll {
   height: 100vh;
   overflow-y: auto;
-  padding: 72px 24px 48px;
+  padding: 72px 20vw 48px;
 }
 
-.lightbox-scroll:not(.layout-grid) {
+/* ─── AI 레이아웃: 좌(AI) / 우(SOURCE) 컬럼 ─── */
+/* specificity 0,3,0 → layout-grid(0,2,0) 및 :not 규칙 완전 덮어씀 */
+.lightbox-scroll.ai-layout,
+.lightbox-scroll.ai-layout.layout-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  padding: 72px 0 48px;
+}
+
+/* 전체 행: 70vw × 70vh */
+.ai-pair-row {
+  display: flex;
+  gap: 8px;
+  width: 70vw;
+  height: 70vh;
+}
+
+/* 좌/우 컬럼 공통: 세로 flex로 이미지 쌓기 */
+.ai-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* 각 이미지 셀 */
+.ai-pair-item {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;       /* flexbox min-size 버그 방지: 이미지 자연 높이로 인한 오버플로우 차단 */
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.ai-pair-item img,
+.ai-pair-item video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain; /* 비율 유지, 박스에 맞춤 — cover 금지 */
+}
+
+.lightbox-scroll:not(.layout-grid):not(.ai-layout) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px;
   align-content: start;
 }
 
-.lightbox-scroll:not(.layout-grid) .media-item {
+.lightbox-scroll:not(.layout-grid):not(.ai-layout) .media-item {
   aspect-ratio: 3 / 4;
 }
 
-.lightbox-scroll:not(.layout-grid) .media-item img,
-.lightbox-scroll:not(.layout-grid) .media-item video {
+.lightbox-scroll:not(.layout-grid):not(.ai-layout) .media-item img,
+.lightbox-scroll:not(.layout-grid):not(.ai-layout) .media-item video {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.lightbox-scroll.lb-display {
-  display: block;
-}
-
-.lightbox-scroll.lb-display .media-item {
-  aspect-ratio: unset;
-  width: 50%;
-  margin: 0 auto 8px;
-}
-
-.lightbox-scroll.lb-display .media-item img,
-.lightbox-scroll.lb-display .media-item video {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: unset;
-}
 
 .lightbox-scroll:not(.layout-grid) .lightbox-tools {
   grid-column: 1 / -1;
@@ -361,15 +388,10 @@
 .lightbox-scroll.layout-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 72px 10vw 48px;
+  gap: 32px;
+  padding: 72px 20vw 48px;
 }
 
-.lightbox-scroll.lb-sampling-1.layout-grid,
-.lightbox-scroll.lb-sampling.layout-grid,
-.lightbox-scroll.lb-grading.layout-grid {
-  gap: 64px;
-}
 
 .grid-row {
   display: flex;
@@ -477,7 +499,9 @@
 
 .media-item:hover .click-hint,
 .hover-pair:hover .click-hint,
-.ftg-triple:hover .click-hint {
+.ftg-triple:hover .click-hint,
+.group-card:hover .click-hint,
+.ai-pair-item:hover .click-hint {
   color: rgba(255, 255, 255, 0.9);
   background: rgba(0, 0, 0, 0.35);
 }
@@ -704,6 +728,127 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  display: block;
+}
+
+/* ─── GROUP CARD ─── */
+.group-card {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  min-width: 0;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.group-card:hover {
+  transform: scale(1.02);
+}
+
+.group-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.08);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.group-card:hover::after {
+  opacity: 1;
+}
+
+.group-card-inner {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+/* 2장, 3장: 고정 높이 */
+.group-card-inner--2,
+.group-card-inner--3 {
+  height: 50vh;
+}
+
+/* 1장(그레이딩): flex로 이미지 자연 비율 유지 */
+.group-card-inner--1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  overflow: hidden;
+}
+
+.group-card-inner--1 img,
+.group-card-inner--1 video {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  display: block;
+}
+
+.group-card-inner--3 img,
+.group-card-inner--3 video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.group-card-inner--2 img,
+.group-card-inner--2 video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.group-card-inner--4 img,
+.group-card-inner--4 video {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  display: block;
+  object-fit: contain;
+}
+
+/* ─── GROUP ZOOM GRID ─── */
+.group-zoom-grid {
+  display: grid;
+  gap: 16px;
+  width: 80vw;
+  align-items: start;
+}
+
+.group-zoom-grid .media-item {
+  min-width: 0;
+  aspect-ratio: 3 / 4;   /* 4장 행 셀 비율 복구 */
+}
+
+.group-zoom-item {
+  cursor: crosshair;
+}
+
+.group-zoom-item:hover {
+  transform: none;
+}
+
+.group-zoom-item::after {
+  display: none;
+}
+
+.lightbox-zoom-content .group-zoom-grid .media-item img,
+.lightbox-zoom-content .group-zoom-grid .media-item video {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;   /* 잘림 없이 박스에 맞춤 (cover는 측면 뷰 머리 잘림) */
+  object-position: center center !important;
   display: block;
 }
 

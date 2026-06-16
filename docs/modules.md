@@ -70,8 +70,13 @@ portfolio/
 - 썸네일 카드 hover 효과
 - 라이트박스 (풀스크린 오버레이 + 세로 스크롤)
 - 그리드 레이아웃 (`_c숫자` suffix 기반 행/열 배치)
+- 그룹 카드 + 그룹 줌 (`.group-card` / `.group-zoom-grid`, 셀 3:4 비율)
 - hover-pair (fullshot/closeup 클릭 시 나란히 줌)
+- AI 레이아웃 (`.ai-layout` — 좌 AI / 우 소스 컬럼, 다른 갤러리와 분리)
 - 줌 오버레이 (라이트박스 내 이미지/영상 클릭 시 전체화면)
+
+> **이미지 표시 규칙(잘림·비율·힌트·AI 레이아웃)은 `docs/lightbox-image-rules.md` 필독.**
+> 라이트박스/줌 작업은 `/gallery` 스킬로 시작하면 규칙을 자동 로드한다.
 
 ### `contact.css`
 - 이메일, 전화번호 버튼 스타일

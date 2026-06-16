@@ -183,12 +183,77 @@ function openLightbox(item) {
     return;
   }
 
-  const hasGrid = images.some(src => /_c\d+\./i.test(src));
+  // AI 레이아웃: 파일명으로 ai/source 분류 후 컬럼 배치
+  if (item.dataset.layout === 'ai') {
+    const titleSlug = 'lb-' + title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    // layout-grid 클래스 포함 → :not(.layout-grid) 규칙 완전 차단
+    lightboxScroll.className = 'lightbox-scroll ai-layout layout-grid ' + titleSlug;
+
+    // 파일명으로 AI 이미지 vs 소스 이미지 분류
+    const aiImages = images.filter(src => /ai_image/i.test(src.split('/').pop()));
+    const sourceImages = images.filter(src => /source_image/i.test(src.split('/').pop()));
+
+    // ai-pair-item 생성 헬퍼
+    function makeAiItem(src, labelText) {
+      const wrap = document.createElement('div');
+      wrap.className = 'ai-pair-item';
+      const img = Object.assign(document.createElement('img'), { src, alt: title, loading: 'eager' });
+      wrap.appendChild(img);
+      addSpinner(wrap, img);
+      if (labelText) {
+        const label = document.createElement('div');
+        label.className = 'ai-label';
+        label.textContent = labelText;
+        wrap.appendChild(label);
+      }
+      const hint = document.createElement('div');
+      hint.className = 'click-hint';
+      hint.textContent = 'CLICK FOR DETAIL';
+      wrap.appendChild(hint);
+      wrap.addEventListener('click', e => { e.stopPropagation(); showZoom([src], []); });
+      return wrap;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'ai-pair-row';
+
+    // 왼쪽 컬럼: AI 이미지 (1장이면 단독, 2장이면 상하 배치)
+    const leftCol = document.createElement('div');
+    leftCol.className = 'ai-col ai-col--left';
+    aiImages.forEach(src => {
+      leftCol.appendChild(makeAiItem(src, null));
+    });
+    row.appendChild(leftCol);
+
+    // 오른쪽 컬럼: 소스 이미지
+    if (sourceImages.length > 0) {
+      const rightCol = document.createElement('div');
+      rightCol.className = 'ai-col ai-col--right';
+      rightCol.appendChild(makeAiItem(sourceImages[0], null));
+      row.appendChild(rightCol);
+    }
+
+    lightboxScroll.appendChild(row);
+    const tools = (item.dataset.tools || '').split(',').map(t => t.trim()).filter(Boolean);
+    if (tools.length > 0) {
+      const toolsSection = document.createElement('div');
+      toolsSection.className = 'lightbox-tools';
+      toolsSection.innerHTML = `<div class="lightbox-tools-label">TOOL</div><div class="lightbox-tools-list">${tools.map(t => `<span>${t}</span>`).join('')}</div>`;
+      lightboxScroll.appendChild(toolsSection);
+    }
+    lightbox.classList.add('active');
+    lightboxScroll.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+
+  // _c1/_c2 suffix AND 01_/02_ prefix 두 조건 모두 충족해야 그룹 카드 레이아웃 사용
+  const hasGrid = images.some(src => /_c\d+\./i.test(src)) &&
+                  images.some(src => /\/\d{2}_/.test(src));
   const titleSlug = 'lb-' + title.toLowerCase().replace(/[^a-z0-9]/g, '-');
   lightboxScroll.className = 'lightbox-scroll' + (hasGrid ? ' layout-grid' : '') + ' ' + titleSlug;
 
   if (hasGrid) {
-    const colWidths = { 1: '100%', 2: 'calc(50% - 4px)', 3: 'calc(33.333% - 5.334px)', 4: 'calc(25% - 6px)' };
     const groups = {};
     images.forEach(src => {
       const filename = src.split('/').pop();
@@ -198,75 +263,61 @@ function openLightbox(item) {
       groups[group].push(src);
     });
 
-    const imageSet = new Set(images);
+    const groupKeys = Object.keys(groups).sort();
 
-    Object.keys(groups).sort().forEach(group => {
-      const rowEl = document.createElement('div');
-      rowEl.className = 'grid-row';
-      const skipSet = new Set();
+    // 그룹 카드를 생성하는 헬퍼
+    function makeGroupCard(groupSrcs, flexBasis) {
+      const card = document.createElement('div');
+      card.className = 'group-card';
+      card.style.flex = flexBasis;
 
-      groups[group].forEach(src => {
-        if (skipSet.has(src)) return;
+      const inner = document.createElement('div');
+      inner.className = `group-card-inner group-card-inner--${groupSrcs.length}`;
+      inner.style.gridTemplateColumns = `repeat(${groupSrcs.length}, 1fr)`;
 
-        const filename = src.split('/').pop();
-        const colMatch = src.match(/_c(\d+)\./i);
-        const cols = colMatch ? parseInt(colMatch[1]) : 1;
-        const width = colWidths[cols] || '100%';
-
-        if (filename.includes('_fullshot_')) {
-          const closeupSrc = src.replace('_fullshot_', '_closeup_');
-          if (imageSet.has(closeupSrc)) {
-            skipSet.add(closeupSrc);
-            const wrapper = document.createElement('div');
-            wrapper.className = 'hover-pair';
-            wrapper.style.flex = `0 0 ${width}`;
-            const fsImg = Object.assign(document.createElement('img'), { src, alt: title, loading: 'eager' });
-            fsImg.className = 'hover-fullshot';
-            const cuImg = Object.assign(document.createElement('img'), { src: closeupSrc, alt: title, loading: 'eager' });
-            cuImg.className = 'hover-closeup';
-            const pairHint = document.createElement('div');
-            pairHint.className = 'click-hint';
-            pairHint.textContent = 'CLICK FOR DETAIL';
-            wrapper.appendChild(fsImg);
-            wrapper.appendChild(cuImg);
-            wrapper.appendChild(pairHint);
-            addSpinner(wrapper, fsImg);
-            rowEl.appendChild(wrapper);
-            return;
-          }
-        }
-
+      groupSrcs.forEach(src => {
         const el = src.match(/\.(mp4|webm|mov)$/i)
-          ? Object.assign(document.createElement('video'), { src, autoplay: true, loop: true, muted: true, playsInline: true })
+          ? Object.assign(document.createElement('video'), { src, loop: true, muted: true, playsInline: true })
           : Object.assign(document.createElement('img'), { src, alt: title, loading: 'eager' });
-        const wrap = document.createElement('div');
-        wrap.className = 'media-item';
-        wrap.style.flex = `0 0 ${width}`;
-        wrap.appendChild(el);
-        addSpinner(wrap, el);
-        if (hasSoundHint && el.tagName === 'VIDEO') {
-          const hint = document.createElement('div');
-          hint.className = 'sound-hint';
-          hint.textContent = 'CLICK FOR SOUND';
-          wrap.appendChild(hint);
-        } else {
-          const hint = document.createElement('div');
-          hint.className = 'click-hint';
-          hint.textContent = 'CLICK FOR DETAIL';
-          wrap.appendChild(hint);
-        }
-        const caption = captions[filename];
-        if (caption) {
-          const label = document.createElement('div');
-          label.className = 'media-caption';
-          label.textContent = caption;
-          wrap.appendChild(label);
-        }
-        rowEl.appendChild(wrap);
+        inner.appendChild(el);
+        addSpinner(inner, el);
       });
 
+      const cardHint = document.createElement('div');
+      cardHint.className = 'click-hint';
+      cardHint.textContent = 'CLICK FOR DETAIL';
+      card.appendChild(inner);
+      card.appendChild(cardHint);
+      card.addEventListener('click', () => showGroupZoom(groupSrcs, title));
+      return card;
+    }
+
+    // _c2 파일 기반 그룹 판별
+    function isCTwoGroup(srcs) {
+      return srcs.some(src => /_c2\./i.test(src));
+    }
+
+    let i = 0;
+    while (i < groupKeys.length) {
+      const groupSrcs = groups[groupKeys[i]];
+      const rowEl = document.createElement('div');
+      rowEl.className = 'grid-row';
+
+      if (isCTwoGroup(groupSrcs) && i + 1 < groupKeys.length && isCTwoGroup(groups[groupKeys[i + 1]])) {
+        // c2 그룹 두 개를 같은 행에 배치 (합산 폭 ≈ 90%)
+        rowEl.appendChild(makeGroupCard(groupSrcs, '0 0 44%'));
+        rowEl.appendChild(makeGroupCard(groups[groupKeys[i + 1]], '0 0 44%'));
+        i += 2;
+      } else {
+        const flexBasis = groupSrcs.length === 3 ? '0 0 90%'
+                        : isCTwoGroup(groupSrcs)  ? '0 0 44%'
+                        : '0 0 100%';
+        rowEl.appendChild(makeGroupCard(groupSrcs, flexBasis));
+        i += 1;
+      }
+
       lightboxScroll.appendChild(rowEl);
-    });
+    }
   } else {
     images.forEach(src => {
       const el = src.match(/\.(mp4|webm|mov)$/i)
@@ -505,6 +556,63 @@ let _amfDetailModel = null;
 let _amfDetailTitle = null;
 let _inAMFDetailZoom = false;
 
+let _currentGroupSrcs = null;
+let _currentGroupTitle = null;
+let _inGroupZoom = false;
+let _fromGroupZoom = false;
+
+function showGroupZoom(srcs, itemTitle) {
+  _currentGroupSrcs = srcs;
+  _currentGroupTitle = itemTitle;
+  _inGroupZoom = true;
+  _fromGroupZoom = false;
+
+  zoomContent.innerHTML = '';
+  zoomContent.className = 'lightbox-zoom-content';
+  zoomContent.style.cssText = '';
+
+  const grid = document.createElement('div');
+  grid.className = 'group-zoom-grid' + (srcs.length === 1 ? ' group-zoom-grid--single' : '');
+  grid.style.gridTemplateColumns = `repeat(${srcs.length}, 1fr)`;
+  grid.style.width = '90vw';
+
+  const mediaEls = [];
+  srcs.forEach(src => {
+    const el = src.match(/\.(mp4|webm|mov)$/i)
+      ? Object.assign(document.createElement('video'), { src, autoplay: true, loop: true, muted: true, playsInline: true })
+      : Object.assign(document.createElement('img'), { src, loading: 'eager' });
+    const wrap = document.createElement('div');
+    wrap.className = 'media-item group-zoom-item';
+
+    // 돋보기 hover 효과
+    wrap.addEventListener('mousemove', e => {
+      const rect = wrap.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      el.style.transformOrigin = `${x}% ${y}%`;
+      el.style.transform = 'scale(2.5)';
+      el.style.transition = 'none';
+    });
+    wrap.addEventListener('mouseleave', () => {
+      el.style.transition = 'transform 0.3s ease';
+      el.style.transform = '';
+      el.style.transformOrigin = 'center center';
+    });
+
+    // 클릭 풀스크린 비활성화
+    wrap.addEventListener('click', e => e.stopPropagation());
+
+    wrap.appendChild(el);
+    mediaEls.push(el);
+    grid.appendChild(wrap);
+  });
+
+  zoomContent.appendChild(grid);
+  addZoomSpinner(mediaEls);
+  zoomOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
 function showAMFDetail(model, title) {
   _amfDetailModel = model;
   _amfDetailTitle = title;
@@ -625,6 +733,7 @@ function showZoom(srcs, labels) {
 lightboxScroll.addEventListener('click', e => {
   if (e.target.closest('.ftg-triple')) return;
   if (e.target.closest('.amf-item')) return;
+  if (e.target.closest('.group-card')) return;
   const pair = e.target.closest('.hover-pair');
   if (pair) {
     const fs = pair.querySelector('.hover-fullshot');
@@ -645,6 +754,9 @@ function closeZoomOverlay() {
     v.load();
   });
   zoomContent.style.cssText = '';
+  _inGroupZoom = false;
+  _fromGroupZoom = false;
+  _currentGroupSrcs = null;
 }
 
 zoomOverlay.addEventListener('click', e => {
@@ -652,6 +764,9 @@ zoomOverlay.addEventListener('click', e => {
     if (_inAMFDetailZoom) {
       _inAMFDetailZoom = false;
       showAMFDetail(_amfDetailModel, _amfDetailTitle);
+    } else if (_fromGroupZoom) {
+      _fromGroupZoom = false;
+      showGroupZoom(_currentGroupSrcs, _currentGroupTitle);
     } else {
       closeZoomOverlay();
     }
@@ -659,6 +774,10 @@ zoomOverlay.addEventListener('click', e => {
   }
   const media = e.target.closest('img');
   if (media && zoomContent.querySelectorAll('img, video').length > 1) {
+    if (_inGroupZoom) {
+      _fromGroupZoom = true;
+      _inGroupZoom = false;
+    }
     showZoom([media.src]);
   }
 });
@@ -667,13 +786,23 @@ zoomClose.addEventListener('click', () => {
   if (_inAMFDetailZoom) {
     _inAMFDetailZoom = false;
     showAMFDetail(_amfDetailModel, _amfDetailTitle);
+  } else if (_fromGroupZoom) {
+    _fromGroupZoom = false;
+    showGroupZoom(_currentGroupSrcs, _currentGroupTitle);
   } else {
     closeZoomOverlay();
   }
 });
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeZoomOverlay();
+  if (e.key === 'Escape') {
+    if (_fromGroupZoom) {
+      _fromGroupZoom = false;
+      showGroupZoom(_currentGroupSrcs, _currentGroupTitle);
+    } else {
+      closeZoomOverlay();
+    }
+  }
 });
 
 function closeLightbox() {

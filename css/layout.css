@@ -12,11 +12,10 @@ nav {
 
 .nav-inner {
   width: 100%;
-  max-width: 1400px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 48px;
+  padding: 0 clamp(100px, 20vw, 400px);
 }
 
 nav.scrolled {
@@ -52,7 +51,7 @@ nav.scrolled {
 
 /* ─── SECTIONS COMMON ─── */
 section {
-  padding: 100px 48px 80px;
+  padding: 100px clamp(100px, 20vw, 400px) 80px;
   border-top: none;
 }
 
@@ -72,7 +71,7 @@ section {
     height: 60px;
   }
   .nav-inner {
-    padding: 0 20px;
+    padding: 0 clamp(16px, 5vw, 32px);
   }
   .nav-links {
     gap: 20px;
@@ -84,6 +83,6 @@ section {
     font-size: 12px;
   }
   section {
-    padding: 80px 20px 60px;
+    padding: 80px clamp(16px, 5vw, 32px) 60px;
   }
 }

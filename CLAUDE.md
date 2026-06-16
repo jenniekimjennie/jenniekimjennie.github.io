@@ -27,7 +27,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 파일 명명 규칙 → `docs/conventions.md`
 - 모듈/구조 변경 → `docs/modules.md`
 - 프로젝트 툴 정보 → `docs/projects.md`
+- 라이트박스/줌 이미지 표시 규칙 → `docs/lightbox-image-rules.md`
 - 협업 규칙 → 이 파일 (CLAUDE.md)
+
+## 6. 갤러리/라이트박스 작업
+- 라이트박스·줌·이미지 표시 관련 작업은 **`docs/lightbox-image-rules.md`를 먼저 읽고** 시작한다.
+- `/gallery` 스킬을 사용하면 규칙과 과거 실수 목록이 자동 로드된다.
 
 ## 4. 의문점은 반드시 질문
 - 요구사항이 불명확하거나 판단이 필요한 경우, 임의로 결정하지 않고 사용자에게 질문한다.
