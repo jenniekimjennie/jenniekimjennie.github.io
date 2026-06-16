@@ -284,10 +284,9 @@
   flex-direction: column;
   gap: 8px;
   min-width: 0;
-  overflow: hidden;
 }
 
-/* 각 이미지 셀 */
+/* 각 이미지 셀 — group-card와 동일한 hover 동작 */
 .ai-pair-item {
   flex: 1;
   min-width: 0;
@@ -295,6 +294,26 @@
   position: relative;
   cursor: pointer;
   overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.ai-pair-item:hover {
+  transform: scale(1.02);
+}
+
+.ai-pair-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.08);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.ai-pair-item:hover::after {
+  opacity: 1;
 }
 
 .ai-pair-item img,
@@ -554,6 +573,14 @@
   max-width: 95vw;
   max-height: 95vh;
   object-fit: contain;
+}
+
+/* 단일 이미지 돋보기 래퍼 — 확대 시 이미지 바깥으로 넘치지 않게 클리핑 */
+.zoom-magnify {
+  overflow: hidden;
+  cursor: zoom-in;
+  display: flex;
+  line-height: 0;
 }
 
 .lightbox-zoom-content.zoom-pair img,
@@ -819,7 +846,7 @@
 /* ─── GROUP ZOOM GRID ─── */
 .group-zoom-grid {
   display: grid;
-  gap: 16px;
+  gap: 8px;              /* 리스트(group-card-inner)와 동일 간격 */
   width: 80vw;
   align-items: start;
 }
@@ -847,9 +874,16 @@
   height: 100% !important;
   max-width: 100% !important;
   max-height: 100% !important;
-  object-fit: contain !important;   /* 잘림 없이 박스에 맞춤 (cover는 측면 뷰 머리 잘림) */
+  object-fit: contain !important;   /* 기본: 잘림 없이 박스에 맞춤 (4장 등) */
   object-position: center center !important;
   display: block;
+}
+
+/* 3장 그룹(브이스티쳐 샘플링) zoom: 리스트와 동일하게 cover로 꽉 채워 붙임 */
+.lightbox-zoom-content .group-zoom-grid--3 .media-item img,
+.lightbox-zoom-content .group-zoom-grid--3 .media-item video {
+  object-fit: cover !important;
+  object-position: center top !important;
 }
 
 /* ─── LOADING SPINNER ─── */

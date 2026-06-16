@@ -572,7 +572,9 @@ function showGroupZoom(srcs, itemTitle) {
   zoomContent.style.cssText = '';
 
   const grid = document.createElement('div');
-  grid.className = 'group-zoom-grid' + (srcs.length === 1 ? ' group-zoom-grid--single' : '');
+  // 장수별 클래스 → 리스트(group-card-inner--N)와 동일한 이미지 맞춤 적용
+  grid.className = 'group-zoom-grid group-zoom-grid--' + srcs.length
+                 + (srcs.length === 1 ? ' group-zoom-grid--single' : '');
   grid.style.gridTemplateColumns = `repeat(${srcs.length}, 1fr)`;
   grid.style.width = '90vw';
 
@@ -720,6 +722,25 @@ function showZoom(srcs, labels) {
       label.className = 'zoom-label';
       label.textContent = labels[i];
       wrap.appendChild(label);
+      zoomContent.appendChild(wrap);
+    } else if (srcs.length === 1 && el.tagName === 'IMG') {
+      // 단일 이미지: 그룹 줌과 동일한 돋보기(커서 줌) 효과
+      const wrap = document.createElement('div');
+      wrap.className = 'zoom-magnify';
+      wrap.appendChild(el);
+      wrap.addEventListener('mousemove', ev => {
+        const rect = el.getBoundingClientRect();
+        const x = ((ev.clientX - rect.left) / rect.width) * 100;
+        const y = ((ev.clientY - rect.top) / rect.height) * 100;
+        el.style.transformOrigin = `${x}% ${y}%`;
+        el.style.transform = 'scale(2.5)';
+        el.style.transition = 'none';
+      });
+      wrap.addEventListener('mouseleave', () => {
+        el.style.transition = 'transform 0.3s ease';
+        el.style.transform = '';
+        el.style.transformOrigin = 'center center';
+      });
       zoomContent.appendChild(wrap);
     } else {
       zoomContent.appendChild(el);
