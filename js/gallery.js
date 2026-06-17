@@ -266,19 +266,26 @@ function openLightbox(item) {
     const groupKeys = Object.keys(groups).sort();
 
     // 그룹 카드를 생성하는 헬퍼
-    function makeGroupCard(groupSrcs, flexBasis) {
+    // displaySrcs: 카드에 실제로 보일 이미지(생략 시 groupSrcs 전체).
+    // 클릭 시 줌에는 항상 groupSrcs 전체(예: Front+Back)를 넘긴다.
+    function makeGroupCard(groupSrcs, flexBasis, displaySrcs) {
+      displaySrcs = displaySrcs || groupSrcs;
       const card = document.createElement('div');
       card.className = 'group-card';
       card.style.flex = flexBasis;
 
       const inner = document.createElement('div');
-      inner.className = `group-card-inner group-card-inner--${groupSrcs.length}`;
-      inner.style.gridTemplateColumns = `repeat(${groupSrcs.length}, 1fr)`;
+      inner.className = `group-card-inner group-card-inner--${displaySrcs.length}`
+                      + (displaySrcs.length > 1 && !isViewGroup(displaySrcs) ? ' group-card-inner--nocrop' : '')
+                      + (isMultiItemGroup(displaySrcs) ? ' group-card-inner--multi' : '');
+      // 컬럼 수는 CSS(.group-card-inner--N)에서 제어 — 모바일 1열 분기 위해 인라인 제거
 
-      groupSrcs.forEach(src => {
+      displaySrcs.forEach((src, idx) => {
         const el = src.match(/\.(mp4|webm|mov)$/i)
           ? Object.assign(document.createElement('video'), { src, loop: true, muted: true, playsInline: true })
           : Object.assign(document.createElement('img'), { src, alt: title, loading: 'eager' });
+        // 모바일 목록: 단일 아이템 그룹은 대표(첫) 컷만 보이고 나머지(gc-alt) 숨김
+        el.classList.add(idx === 0 ? 'gc-front' : 'gc-alt');
         inner.appendChild(el);
         addSpinner(inner, el);
       });
@@ -303,15 +310,20 @@ function openLightbox(item) {
       const rowEl = document.createElement('div');
       rowEl.className = 'grid-row';
 
-      if (isCTwoGroup(groupSrcs) && i + 1 < groupKeys.length && isCTwoGroup(groups[groupKeys[i + 1]])) {
-        // c2 그룹 두 개를 같은 행에 배치 (합산 폭 ≈ 90%)
-        rowEl.appendChild(makeGroupCard(groupSrcs, '0 0 44%'));
-        rowEl.appendChild(makeGroupCard(groups[groupKeys[i + 1]], '0 0 44%'));
-        i += 2;
+      if (isCTwoGroup(groupSrcs)) {
+        // 연속된 c2 그룹들을 한 행에 카드로 나란히 배치 (3개 ≈ 90% 폭)
+        // 목록엔 Front 한 장만, 클릭 시 줌에서 Front+Back 전체 표시
+        rowEl.classList.add('grid-row--c2');   // 모바일에서 카드 폭 축소(세로형이라 full-width면 과대) 스코프
+        let j = i;
+        while (j < groupKeys.length && isCTwoGroup(groups[groupKeys[j]])) {
+          const g = groups[groupKeys[j]];
+          const front = g.find(s => /_front_/i.test(s.split('/').pop())) || g[0];
+          rowEl.appendChild(makeGroupCard(g, '0 0 calc(30% - 6px)', [front]));
+          j += 1;
+        }
+        i = j;
       } else {
-        const flexBasis = groupSrcs.length === 3 ? '0 0 90%'
-                        : isCTwoGroup(groupSrcs)  ? '0 0 44%'
-                        : '0 0 100%';
+        const flexBasis = groupSrcs.length === 3 ? '0 0 90%' : '0 0 100%';
         rowEl.appendChild(makeGroupCard(groupSrcs, flexBasis));
         i += 1;
       }
@@ -561,6 +573,48 @@ let _currentGroupTitle = null;
 let _inGroupZoom = false;
 let _fromGroupZoom = false;
 
+// 같은 의류의 정해진 뷰(front/Left/Back)로 구성된 그룹인지 판별.
+// 뷰 그룹이면 cover로 꽉 채워 붙이고, 아니면(서로 다른 의류 단독샷 등) contain으로 잘림 없이 표시.
+function isViewGroup(srcs) {
+  return srcs.length > 1 &&
+         srcs.every(s => /_(front|left|back)_/i.test(s.split('/').pop()));
+}
+
+// 그룹의 base명(뷰/번호/컬러웨이 등 후행 토큰 + _cN 제거, 소문자화).
+// 같은 아이템의 여러 컷이면 base가 동일, 서로 다른 아이템이면 base가 갈린다.
+function groupBase(src) {
+  let b = src.split('/').pop().toLowerCase().replace(/_c\d+\.\w+$/i, '');
+  // 후행 뷰/번호/단일문자 토큰을 반복 제거 (예: _front, _1, _1_1, _f)
+  while (/_(\d+|[a-z]|front|left|back)$/.test(b)) {
+    b = b.replace(/_(\d+|[a-z]|front|left|back)$/, '');
+  }
+  return b;
+}
+
+// 서로 다른 아이템이 한 그룹에 묶였는지(예: 04 = CARDI/TANK/PANT). base가 2개 이상이면 true.
+function isMultiItemGroup(srcs) {
+  return new Set(srcs.map(groupBase)).size > 1;
+}
+
+// 커서 돋보기 — 그룹 줌/단일 줌 공용. 마우스(hover 가능) 기기에서만 동작.
+// wrap: 이벤트 대상 / el: 확대할 이미지 / rectEl: 좌표 기준 요소 / scale: 배율
+function attachMagnifier(wrap, el, rectEl = el, scale = 1.75) {
+  wrap.addEventListener('mousemove', e => {
+    if (!window.matchMedia('(hover: hover)').matches) return;
+    const rect = rectEl.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    el.style.transformOrigin = `${x}% ${y}%`;
+    el.style.transform = `scale(${scale})`;
+    el.style.transition = 'none';
+  });
+  wrap.addEventListener('mouseleave', () => {
+    el.style.transition = 'transform 0.3s ease';
+    el.style.transform = '';
+    el.style.transformOrigin = 'center center';
+  });
+}
+
 function showGroupZoom(srcs, itemTitle) {
   _currentGroupSrcs = srcs;
   _currentGroupTitle = itemTitle;
@@ -574,9 +628,9 @@ function showGroupZoom(srcs, itemTitle) {
   const grid = document.createElement('div');
   // 장수별 클래스 → 리스트(group-card-inner--N)와 동일한 이미지 맞춤 적용
   grid.className = 'group-zoom-grid group-zoom-grid--' + srcs.length
-                 + (srcs.length === 1 ? ' group-zoom-grid--single' : '');
-  grid.style.gridTemplateColumns = `repeat(${srcs.length}, 1fr)`;
-  // 폭은 CSS(.group-zoom-grid)에서 제어 — 모바일 분기 위해 인라인 제거
+                 + (srcs.length === 1 ? ' group-zoom-grid--single' : '')
+                 + (srcs.length > 1 && !isViewGroup(srcs) ? ' group-zoom-grid--nocrop' : '');
+  // 폭/컬럼은 CSS(.group-zoom-grid, --N)에서 제어 — 모바일 1열 세로 스택 분기 위해 인라인 제거
 
   const mediaEls = [];
   srcs.forEach(src => {
@@ -586,32 +640,27 @@ function showGroupZoom(srcs, itemTitle) {
     const wrap = document.createElement('div');
     wrap.className = 'media-item group-zoom-item';
 
-    // 돋보기 hover 효과 — 마우스(hover 가능) 기기에서만
-    wrap.addEventListener('mousemove', e => {
-      if (!window.matchMedia('(hover: hover)').matches) return;
-      const rect = wrap.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      el.style.transformOrigin = `${x}% ${y}%`;
-      el.style.transform = 'scale(2.5)';
-      el.style.transition = 'none';
-    });
-    wrap.addEventListener('mouseleave', () => {
-      el.style.transition = 'transform 0.3s ease';
-      el.style.transform = '';
-      el.style.transformOrigin = 'center center';
-    });
-
-    // 클릭: 마우스는 돋보기가 인터랙션이라 풀스크린 막음.
-    // 터치(hover 불가)는 탭 = 그 한 장 전체화면 (뒤로가면 그룹 줌 복귀)
-    wrap.addEventListener('click', e => {
-      e.stopPropagation();
-      if (!window.matchMedia('(hover: hover)').matches) {
-        _fromGroupZoom = true;
-        _inGroupZoom = false;
-        showZoom([el.src || src], []);
-      }
-    });
+    if (srcs.length === 1) {
+      // 1장 그룹(그레이딩 등): 클릭 시 90도 회전 토글 (와이드 차트를 세로 화면에 크게)
+      wrap.style.cursor = 'pointer';
+      wrap.addEventListener('click', e => {
+        e.stopPropagation();
+        grid.classList.toggle('zoom-rotated');
+      });
+    } else {
+      // 돋보기 hover 효과 — 셀(wrap) 기준
+      attachMagnifier(wrap, el, wrap);
+      // 클릭: 마우스는 돋보기가 인터랙션이라 풀스크린 막음.
+      // 터치(hover 불가)는 탭 = 그 한 장 전체화면 (뒤로가면 그룹 줌 복귀)
+      wrap.addEventListener('click', e => {
+        e.stopPropagation();
+        if (!window.matchMedia('(hover: hover)').matches) {
+          _fromGroupZoom = true;
+          _inGroupZoom = false;
+          showZoom([el.src || src], []);
+        }
+      });
+    }
 
     wrap.appendChild(el);
     mediaEls.push(el);
@@ -621,6 +670,8 @@ function showGroupZoom(srcs, itemTitle) {
   zoomContent.appendChild(grid);
   addZoomSpinner(mediaEls);
   zoomOverlay.classList.add('active');
+  // 여러 장일 때만 모바일 세로 스택 스크롤. 1장(그레이딩 등)은 중앙 뷰포트 맞춤 유지.
+  zoomOverlay.classList.toggle('zoom-scroll', srcs.length > 1);
   document.body.style.overflow = 'hidden';
 }
 
@@ -630,6 +681,7 @@ function showAMFDetail(model, title) {
   _inAMFDetailZoom = false;
 
   zoomContent.innerHTML = '';
+  zoomOverlay.classList.remove('zoom-scroll');
   zoomContent.className = 'lightbox-zoom-content';
   zoomContent.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:0;';
 
@@ -716,6 +768,7 @@ function addZoomSpinner(mediaEls) {
 
 function showZoom(srcs, labels) {
   zoomContent.innerHTML = '';
+  zoomOverlay.classList.remove('zoom-scroll');   // 단일/페어 탭: 중앙 정렬 유지
   zoomContent.className = 'lightbox-zoom-content' + (srcs.length === 3 ? ' zoom-triple' : srcs.length > 1 ? ' zoom-pair' : '');
   const mediaEls = [];
   srcs.forEach((src, i) => {
@@ -733,24 +786,11 @@ function showZoom(srcs, labels) {
       wrap.appendChild(label);
       zoomContent.appendChild(wrap);
     } else if (srcs.length === 1 && el.tagName === 'IMG') {
-      // 단일 이미지: 그룹 줌과 동일한 돋보기(커서 줌) 효과
+      // 단일 이미지: 그룹 줌과 동일한 돋보기(커서 줌) 효과 — 이미지 자체 기준
       const wrap = document.createElement('div');
       wrap.className = 'zoom-magnify';
       wrap.appendChild(el);
-      wrap.addEventListener('mousemove', ev => {
-        if (!window.matchMedia('(hover: hover)').matches) return;
-        const rect = el.getBoundingClientRect();
-        const x = ((ev.clientX - rect.left) / rect.width) * 100;
-        const y = ((ev.clientY - rect.top) / rect.height) * 100;
-        el.style.transformOrigin = `${x}% ${y}%`;
-        el.style.transform = 'scale(2.5)';
-        el.style.transition = 'none';
-      });
-      wrap.addEventListener('mouseleave', () => {
-        el.style.transition = 'transform 0.3s ease';
-        el.style.transform = '';
-        el.style.transformOrigin = 'center center';
-      });
+      attachMagnifier(wrap, el, el);
       zoomContent.appendChild(wrap);
     } else {
       zoomContent.appendChild(el);

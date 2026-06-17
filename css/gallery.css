@@ -555,6 +555,7 @@
   align-items: center;
   justify-content: center;
   cursor: zoom-out;
+  overflow: hidden;   /* 회전 등으로 박스가 뷰포트를 넘쳐도 스크롤바 방지 (zoom-scroll에서 세로만 auto) */
 }
 
 .lightbox-zoom.active {
@@ -793,6 +794,11 @@
   width: 100%;
 }
 
+/* 컬럼 수 (JS 인라인에서 CSS로 이동 — 모바일 1열 분기 위해) */
+.group-card-inner--2 { grid-template-columns: repeat(2, 1fr); }
+.group-card-inner--3 { grid-template-columns: repeat(3, 1fr); }
+.group-card-inner--4 { grid-template-columns: repeat(4, 1fr); }
+
 /* 2장, 3장: 고정 높이 */
 .group-card-inner--2,
 .group-card-inner--3 {
@@ -835,6 +841,13 @@
   object-position: center top;
 }
 
+/* 뷰 그룹이 아닌 다중 이미지(예: 서로 다른 의류 단독샷) → 잘림 없이 contain */
+.group-card-inner--nocrop img,
+.group-card-inner--nocrop video {
+  object-fit: contain;
+  object-position: center center;
+}
+
 .group-card-inner--4 img,
 .group-card-inner--4 video {
   width: 100%;
@@ -850,6 +863,11 @@
   width: 90vw;
   align-items: start;
 }
+
+/* 컬럼 수 (JS 인라인에서 CSS로 이동 — 모바일 1열 세로 스택 분기 위해) */
+.group-zoom-grid--2 { grid-template-columns: repeat(2, 1fr); }
+.group-zoom-grid--3 { grid-template-columns: repeat(3, 1fr); }
+.group-zoom-grid--4 { grid-template-columns: repeat(4, 1fr); }
 
 .group-zoom-grid .media-item {
   min-width: 0;
@@ -886,6 +904,18 @@
   object-position: center top !important;
 }
 
+/* 2장 그룹 zoom: 90vw 2칸이면 각 45vw로 3장 그룹(30vw)보다 커짐 → 폭 60vw로 줄여 동일 크기 */
+.group-zoom-grid--2 {
+  width: 60vw;
+}
+
+/* 뷰 그룹이 아닌 다중 이미지 그룹(예: 04 = 서로 다른 의류 정면샷) → cover 해제, 잘림 없이 contain */
+.lightbox-zoom-content .group-zoom-grid--nocrop .media-item img,
+.lightbox-zoom-content .group-zoom-grid--nocrop .media-item video {
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
 /* 1장 그룹(그레이딩 / c2 단일 합성 이미지) zoom:
    3:4 셀을 강제하면 90vw 정사각이 화면 밖으로 넘쳐 위아래가 잘림.
    셀 비율 해제 + 이미지를 뷰포트(85vh)에 맞춰 전체 표시 */
@@ -907,6 +937,18 @@
   max-height: 85vh !important;
   object-fit: contain !important;
   object-position: center center !important;
+}
+
+/* 1장 그룹(그레이딩 등) 클릭 → 90도 회전. 와이드 차트를 세로 화면에 크게.
+   회전 후 세로=max-width, 가로=max-height로 뷰포트에 맞춤 */
+.group-zoom-grid--single.zoom-rotated .media-item {
+  overflow: visible;   /* 회전 이미지가 셀 밖으로 나가도 잘리지 않게 */
+}
+.lightbox-zoom-content .group-zoom-grid--single.zoom-rotated .media-item img,
+.lightbox-zoom-content .group-zoom-grid--single.zoom-rotated .media-item video {
+  transform: rotate(90deg);
+  max-width: 88vh !important;
+  max-height: 92vw !important;
 }
 
 /* ─── LOADING SPINNER ─── */
@@ -950,10 +992,55 @@
     padding: 64px 12px 40px;
   }
 
-  /* 그룹 줌: 화면 폭 거의 꽉, 간격 축소. 나란히 배치 유지 */
-  .group-zoom-grid {
+  /* 모든 그룹 카드를 한 행에 단독(세로 스택). c2도 1열로.
+     (카드 flex 폭이 JS 인라인이라 !important로 덮음) */
+  .grid-row .group-card {
+    flex: 0 0 100% !important;
+  }
+  /* c2(01·02·03)는 세로 3:4라 full-width면 정사각(3컷)보다 커 보임 → 60% 폭(중앙)으로 축소 */
+  .grid-row.grid-row--c2 .group-card {
+    flex: 0 0 60% !important;
+  }
+
+  /* 목록(모바일): 단일 아이템 그룹은 대표(첫) 컷만, 다중 아이템(04)은 전부 세로 스택.
+     50vh 고정 해제 + contain → 빈 공간/잘림 제거 */
+  .group-card-inner--1,
+  .group-card-inner--2,
+  .group-card-inner--3,
+  .group-card-inner--4 {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .group-card-inner:not(.group-card-inner--multi) .gc-alt {
+    display: none;
+  }
+  .group-card-inner img,
+  .group-card-inner video {
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  /* 그룹 줌(모바일): 1열 세로 스택. 셀은 균일 3:4 컨테이너 유지(데스크탑 기본),
+     이미지는 contain으로 담아 잘림 없음(--3 cover 해제).
+     1장 그룹(--single, 그레이딩 등)은 제외 — 데스크탑 중앙 뷰포트 맞춤 유지 */
+  .group-zoom-grid:not(.group-zoom-grid--single) {
     width: 96vw;
-    gap: 4px;
+    gap: 8px;
+    grid-template-columns: 1fr !important;
+  }
+  .lightbox-zoom-content .group-zoom-grid:not(.group-zoom-grid--single) .media-item img,
+  .lightbox-zoom-content .group-zoom-grid:not(.group-zoom-grid--single) .media-item video {
+    object-fit: contain !important;
+  }
+
+  /* 그룹 줌만: 세로로 긴 스택을 위에서부터 + 스크롤 (단일 탭-전체화면은 중앙 유지) */
+  .lightbox-zoom.zoom-scroll {
+    align-items: flex-start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .lightbox-zoom.zoom-scroll .lightbox-zoom-content {
+    padding: 60px 0 40px;   /* 닫기 버튼/하단 여백 확보 */
   }
 
   /* hover 힌트는 터치에서 안 뜨므로 숨김 (탭 동작은 그대로) */

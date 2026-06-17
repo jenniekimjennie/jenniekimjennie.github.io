@@ -46,8 +46,18 @@
 
 ## 3. 줌 뷰 가로폭
 
-- 그룹 줌(`showGroupZoom`) 가로폭은 **90vw** (`js/gallery.js`의 `grid.style.width`).
-- CSS `.group-zoom-grid { width: 80vw }` 가 있어도 JS 인라인 값이 우선이므로 **JS에서 변경**한다.
+- 그룹 줌(`showGroupZoom`) 가로폭은 CSS `.group-zoom-grid { width: 90vw }`에서 제어한다. (JS 인라인 폭은 모바일 분기를 위해 제거됨)
+- **2장 그룹**(`--2`)은 90vw 2칸이면 각 45vw로 3장 그룹(각 30vw)보다 커진다 → `.group-zoom-grid--2 { width: 60vw }`로 줄여 **3장 그룹과 동일 크기**로 맞춘다.
+- 1장 그룹(`--single`)은 7번 참고(뷰포트 맞춤).
+
+---
+
+## 3-1. 뷰 그룹 vs 비뷰(nocrop) 그룹 — cover/contain 분기
+
+- **뷰 그룹**: 같은 의류의 front/Left/Back 뷰로 구성된 다중 이미지 그룹. 리스트·줌 모두 **cover**(center top)로 꽉 채워 붙인다(`group-card-inner--3`, `group-zoom-grid--3`). 같은 의류라 프레이밍이 일정해 잘림이 자연스럽다.
+- **비뷰 그룹(nocrop)**: 서로 다른 의류 단독샷이 한 그룹에 묶인 경우(예: 04 = CARDI/TANK/PANT 정면). cover로 채우면 비율이 제각각이라 다리/하단이 잘린다 → **contain**으로 잘림 없이 표시.
+- 판별: `isViewGroup(srcs)` = 2장 이상이면서 모든 파일명이 `_(front|left|back)_` 포함. 아니면 `--nocrop` 수식 클래스를 붙여 contain.
+- 적용: 리스트 `.group-card-inner--nocrop`, 줌 `.group-zoom-grid--nocrop` → `object-fit: contain`.
 
 ---
 
@@ -109,8 +119,11 @@ JS에서는 `<div class="click-hint">CLICK FOR DETAIL</div>` 를 컨테이너에
 ## 8. 모바일 대응 (768px 이하)
 
 - 기준: `@media (max-width: 768px)`. 데스크탑 레이아웃은 유지하고 이 블록에서만 분기.
-- **리스트**: 그룹(여러 장 한 줄)은 그대로 유지. 라이트박스 좌우 패딩 `20vw → 12px`로 줄여 이미지 폭 확보.
-- **그룹 줌**: 나란히 배치 유지, 폭 `96vw` + 간격 축소.
+- **리스트(대표 1장)**: 모바일에선 **단일 아이템 그룹은 대표(첫) 컷만** 표시(나머지 `.gc-alt` 숨김), 클릭하면 줌에서 전체. 서로 다른 아이템이 묶인 **다중 아이템 그룹(예: 04)은 전부 세로 스택**. 판별은 `isMultiItemGroup`(파일 base명이 2개 이상). 데스크탑은 현행(전 컷 표시) 유지.
+  - 50vh 고정 높이 해제 → `height:auto` + `object-fit:contain`로 빈 공간·잘림 제거.
+  - 컬럼 수는 CSS `.group-card-inner--N`로 두고 모바일에서 `1fr`로 덮는다. (JS 인라인 `gridTemplateColumns` 금지 — @media로 못 덮음)
+  - 라이트박스 좌우 패딩 `20vw → 12px`.
+- **그룹 줌**: 모바일은 **1열 세로 스택**(`grid-template-columns:1fr`), 셀 `aspect-ratio` 해제, 이미지 `width:100%/height:auto/contain`. 폭 `96vw`. (컬럼도 CSS `.group-zoom-grid--N` → 모바일 1fr)
 - **AI 레이아웃**: 좌/우 컬럼 → **위/아래 세로 전환**(`flex-direction: column`), 폭 `92vw`, 이미지 `height:auto`.
 - **돋보기(커서 줌)**: 터치는 hover가 없으므로 `window.matchMedia('(hover: hover)')` 가드로 **마우스 기기에서만** 작동.
   모바일은 **이미지 탭 = 그 한 장 전체화면**(`showZoom([src])`, 뒤로가면 그룹 줌 복귀).
