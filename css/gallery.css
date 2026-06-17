@@ -847,7 +847,7 @@
 .group-zoom-grid {
   display: grid;
   gap: 8px;              /* 리스트(group-card-inner)와 동일 간격 */
-  width: 80vw;
+  width: 90vw;
   align-items: start;
 }
 
@@ -886,6 +886,29 @@
   object-position: center top !important;
 }
 
+/* 1장 그룹(그레이딩 / c2 단일 합성 이미지) zoom:
+   3:4 셀을 강제하면 90vw 정사각이 화면 밖으로 넘쳐 위아래가 잘림.
+   셀 비율 해제 + 이미지를 뷰포트(85vh)에 맞춰 전체 표시 */
+.group-zoom-grid--single {
+  width: auto;
+  max-width: 92vw;
+  justify-content: center;
+}
+
+.group-zoom-grid--single .media-item {
+  aspect-ratio: auto;
+}
+
+.lightbox-zoom-content .group-zoom-grid--single .media-item img,
+.lightbox-zoom-content .group-zoom-grid--single .media-item video {
+  width: auto !important;
+  height: auto !important;
+  max-width: 92vw !important;
+  max-height: 85vh !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
 /* ─── LOADING SPINNER ─── */
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -916,4 +939,46 @@
   top: 50%;
   left: 50%;
   margin: -14px 0 0 -14px;
+}
+
+/* ─── 모바일 대응 (768px 이하) ─── */
+/* 데스크탑 레이아웃 유지, 768px 이하에서만 분기. 상세: docs/lightbox-image-rules.md */
+@media (max-width: 768px) {
+  /* 라이트박스 좌우 여백 축소 → 이미지 폭 최대화 (그룹은 한 줄 그대로 유지) */
+  .lightbox-scroll,
+  .lightbox-scroll.layout-grid {
+    padding: 64px 12px 40px;
+  }
+
+  /* 그룹 줌: 화면 폭 거의 꽉, 간격 축소. 나란히 배치 유지 */
+  .group-zoom-grid {
+    width: 96vw;
+    gap: 4px;
+  }
+
+  /* hover 힌트는 터치에서 안 뜨므로 숨김 (탭 동작은 그대로) */
+  .click-hint {
+    display: none;
+  }
+
+  /* AI 섹션: 좌(AI)/우(소스) → 위/아래 세로 전환 */
+  .ai-pair-row {
+    flex-direction: column;
+    width: 92vw;
+    height: auto;
+  }
+  .ai-col {
+    width: 100%;
+  }
+  /* 세로 스택: 각 이미지를 폭 기준 자연 높이로 */
+  .ai-pair-item {
+    flex: none;
+    min-height: 0;
+    height: auto;
+  }
+  .ai-pair-item img,
+  .ai-pair-item video {
+    height: auto;
+    width: 100%;
+  }
 }

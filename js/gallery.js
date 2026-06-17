@@ -576,7 +576,7 @@ function showGroupZoom(srcs, itemTitle) {
   grid.className = 'group-zoom-grid group-zoom-grid--' + srcs.length
                  + (srcs.length === 1 ? ' group-zoom-grid--single' : '');
   grid.style.gridTemplateColumns = `repeat(${srcs.length}, 1fr)`;
-  grid.style.width = '90vw';
+  // 폭은 CSS(.group-zoom-grid)에서 제어 — 모바일 분기 위해 인라인 제거
 
   const mediaEls = [];
   srcs.forEach(src => {
@@ -586,8 +586,9 @@ function showGroupZoom(srcs, itemTitle) {
     const wrap = document.createElement('div');
     wrap.className = 'media-item group-zoom-item';
 
-    // 돋보기 hover 효과
+    // 돋보기 hover 효과 — 마우스(hover 가능) 기기에서만
     wrap.addEventListener('mousemove', e => {
+      if (!window.matchMedia('(hover: hover)').matches) return;
       const rect = wrap.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 100;
       const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -601,8 +602,16 @@ function showGroupZoom(srcs, itemTitle) {
       el.style.transformOrigin = 'center center';
     });
 
-    // 클릭 풀스크린 비활성화
-    wrap.addEventListener('click', e => e.stopPropagation());
+    // 클릭: 마우스는 돋보기가 인터랙션이라 풀스크린 막음.
+    // 터치(hover 불가)는 탭 = 그 한 장 전체화면 (뒤로가면 그룹 줌 복귀)
+    wrap.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!window.matchMedia('(hover: hover)').matches) {
+        _fromGroupZoom = true;
+        _inGroupZoom = false;
+        showZoom([el.src || src], []);
+      }
+    });
 
     wrap.appendChild(el);
     mediaEls.push(el);
@@ -729,6 +738,7 @@ function showZoom(srcs, labels) {
       wrap.className = 'zoom-magnify';
       wrap.appendChild(el);
       wrap.addEventListener('mousemove', ev => {
+        if (!window.matchMedia('(hover: hover)').matches) return;
         const rect = el.getBoundingClientRect();
         const x = ((ev.clientX - rect.left) / rect.width) * 100;
         const y = ((ev.clientY - rect.top) / rect.height) * 100;
