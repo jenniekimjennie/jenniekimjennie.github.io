@@ -939,14 +939,26 @@
   object-position: center center !important;
 }
 
-/* 1장 그룹(그레이딩 등) 클릭 → 90도 회전. 와이드 차트를 세로 화면에 크게.
+/* 1장 그룹(그레이딩 등) 90도 회전(모바일). 와이드 차트를 세로 화면에 크게.
+   회전 전 박스가 좁은 그리드에서 좌측 정렬되면 회전 축이 틀어지므로,
+   그리드/셀을 전체폭 + 중앙정렬로 만들어 회전 축을 화면 중앙에 맞춘다.
    회전 후 세로=max-width, 가로=max-height로 뷰포트에 맞춤 */
+.group-zoom-grid--single.zoom-rotated {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  justify-content: center;
+}
 .group-zoom-grid--single.zoom-rotated .media-item {
   overflow: visible;   /* 회전 이미지가 셀 밖으로 나가도 잘리지 않게 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .lightbox-zoom-content .group-zoom-grid--single.zoom-rotated .media-item img,
 .lightbox-zoom-content .group-zoom-grid--single.zoom-rotated .media-item video {
   transform: rotate(90deg);
+  width: auto !important;
+  height: auto !important;
   max-width: 88vh !important;
   max-height: 92vw !important;
 }

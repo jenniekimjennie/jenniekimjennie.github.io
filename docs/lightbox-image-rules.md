@@ -120,23 +120,30 @@ JS에서는 `<div class="click-hint">CLICK FOR DETAIL</div>` 를 컨테이너에
 
 - 기준: `@media (max-width: 768px)`. 데스크탑 레이아웃은 유지하고 이 블록에서만 분기.
 - **리스트(대표 1장)**: 모바일에선 **단일 아이템 그룹은 대표(첫) 컷만** 표시(나머지 `.gc-alt` 숨김), 클릭하면 줌에서 전체. 서로 다른 아이템이 묶인 **다중 아이템 그룹(예: 04)은 전부 세로 스택**. 판별은 `isMultiItemGroup`(파일 base명이 2개 이상). 데스크탑은 현행(전 컷 표시) 유지.
+  - 모든 그룹 카드 `flex: 0 0 100% !important`(한 행에 1개씩 세로). **CSS `!important`는 JS 인라인 flex를 덮는 유일한 방법.**
+  - 단, **c2 행(`.grid-row--c2`)은 `60%` 폭**(중앙). c2는 세로 3:4(1200×1600)라 full-width면 정사각(1600×1600) 3컷보다 커 보임 → 폭 줄여 균형.
   - 50vh 고정 높이 해제 → `height:auto` + `object-fit:contain`로 빈 공간·잘림 제거.
   - 컬럼 수는 CSS `.group-card-inner--N`로 두고 모바일에서 `1fr`로 덮는다. (JS 인라인 `gridTemplateColumns` 금지 — @media로 못 덮음)
   - 라이트박스 좌우 패딩 `20vw → 12px`.
-- **그룹 줌**: 모바일은 **1열 세로 스택**(`grid-template-columns:1fr`), 셀 `aspect-ratio` 해제, 이미지 `width:100%/height:auto/contain`. 폭 `96vw`. (컬럼도 CSS `.group-zoom-grid--N` → 모바일 1fr)
+- **그룹 줌(여러 장)**: 모바일은 **1열 세로 스택**(`grid-template-columns:1fr`), **셀은 균일 3:4 유지(데스크탑 기본 그대로)**, 이미지는 `object-fit:contain`(--3 cover 해제). 폭 `96vw`.
+  - **1장 그룹(`--single`)은 제외**(`:not(.group-zoom-grid--single)`) — 데스크탑 중앙 뷰포트 맞춤 유지.
+  - 세로로 긴 스택 스크롤: JS가 **여러 장일 때만** 오버레이에 `.zoom-scroll` 부여(`srcs.length>1`). `.lightbox-zoom.zoom-scroll`만 `align-items:flex-start; overflow-y:auto`. 단일 탭-전체화면/1장 줌은 중앙 유지.
+- **1장 그룹(그레이딩) 줌 회전**: 그레이딩은 와이드 차트(예: 3000×1250)라 세로 화면에서 작음 → **모바일(hover 불가)에선 줌 열 때 자동으로 90° 회전**(`grid.classList.add('zoom-rotated')`, 클릭 동작 없음). **데스크탑(hover)은 회전 없이 돋보기 유지.** 회전 후 fit은 `max-width↔max-height`를 vh/vw로 swap(`max-width:88vh; max-height:92vw`), 셀 `overflow:visible`(회전 이미지 잘림 방지). `.lightbox-zoom`은 `overflow:hidden`으로 회전 박스 넘침 시 스크롤바 방지.
 - **AI 레이아웃**: 좌/우 컬럼 → **위/아래 세로 전환**(`flex-direction: column`), 폭 `92vw`, 이미지 `height:auto`.
-- **돋보기(커서 줌)**: 터치는 hover가 없으므로 `window.matchMedia('(hover: hover)')` 가드로 **마우스 기기에서만** 작동.
-  모바일은 **이미지 탭 = 그 한 장 전체화면**(`showZoom([src])`, 뒤로가면 그룹 줌 복귀).
+- **돋보기(커서 줌)**: 터치는 hover가 없으므로 `window.matchMedia('(hover: hover)')` 가드로 **마우스 기기에서만** 작동(공용 `attachMagnifier`, 배율 1.75).
+  모바일은 **이미지 탭 = 그 한 장 전체화면**(`showZoom([src])`, 뒤로가면 그룹 줌 복귀). 단, 1장 그룹 줌은 탭=회전(위 참고).
 - **hover 힌트**: 모바일에서 `.click-hint { display:none }` (탭 동작은 정상).
 
 ---
 
 ## 9. 체크리스트 (라이트박스/줌 손대기 전)
 
-1. 이미지가 잘리나? → `contain` 인지 확인, `cover` 있으면 의심.
-2. 4장 행/그룹 셀이 3:4 비율인가? **단, 1장 그룹은 3:4 금지(8번 참고).**
+1. 이미지가 잘리나? → `contain` 인지 확인, `cover` 있으면 의심. (뷰 그룹만 cover, 3-1 참고)
+2. 4장 행/그룹 셀이 3:4 비율인가? **단, 1장 그룹은 3:4 금지(7번 참고).**
 3. 힌트는 공유 `.click-hint` 오버레이를 쓰는가? (작은 박스 새로 만들지 않았는가?)
 4. 요청하지 않은 레이블/요소를 추가하지 않았는가?
 5. AI 레이아웃을 건드리는가? → 별도 경로인지, 다른 갤러리에 영향 없는지.
 6. 공유 CSS 규칙을 바꿨다면 → 다른 갤러리 줌 뷰가 깨지지 않는지.
 7. 모바일(768px↓)에서도 확인했는가? 돋보기는 hover 기기 전용인가?
+8. **그리드 컬럼/카드 폭을 JS 인라인으로 박지 않았는가?** → 모바일 @media로 못 덮음. CSS 클래스(`--N`)로 두기.
+9. 모바일 목록: 단일 아이템=대표 1장(`.gc-alt` 숨김), 다중 아이템(`isMultiItemGroup`)=전부 표시. 줌 세로 스택은 `.zoom-scroll`(여러 장만), `--single` 제외.

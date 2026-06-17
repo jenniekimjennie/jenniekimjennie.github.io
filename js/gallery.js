@@ -631,6 +631,10 @@ function showGroupZoom(srcs, itemTitle) {
                  + (srcs.length === 1 ? ' group-zoom-grid--single' : '')
                  + (srcs.length > 1 && !isViewGroup(srcs) ? ' group-zoom-grid--nocrop' : '');
   // 폭/컬럼은 CSS(.group-zoom-grid, --N)에서 제어 — 모바일 1열 세로 스택 분기 위해 인라인 제거
+  // 1장 그룹(그레이딩 등): 모바일(hover 불가)에선 와이드 차트를 세로 화면에 크게 보이도록 처음부터 90도 회전
+  if (srcs.length === 1 && !window.matchMedia('(hover: hover)').matches) {
+    grid.classList.add('zoom-rotated');
+  }
 
   const mediaEls = [];
   srcs.forEach(src => {
@@ -641,12 +645,8 @@ function showGroupZoom(srcs, itemTitle) {
     wrap.className = 'media-item group-zoom-item';
 
     if (srcs.length === 1) {
-      // 1장 그룹(그레이딩 등): 클릭 시 90도 회전 토글 (와이드 차트를 세로 화면에 크게)
-      wrap.style.cursor = 'pointer';
-      wrap.addEventListener('click', e => {
-        e.stopPropagation();
-        grid.classList.toggle('zoom-rotated');
-      });
+      // 데스크탑(hover): 돋보기. 모바일은 위에서 자동 회전 처리(클릭 동작 없음)
+      attachMagnifier(wrap, el, wrap);
     } else {
       // 돋보기 hover 효과 — 셀(wrap) 기준
       attachMagnifier(wrap, el, wrap);
